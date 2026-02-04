@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Venn Diagram Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -55,6 +58,7 @@
             flex-direction: column;
             flex-shrink: 0;
             transition: transform 0.3s ease, opacity 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         #control-panel.hidden {
@@ -144,7 +148,7 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Monaco', 'Menlo', monospace;
+            font-family: 'JetBrains Mono', monospace;
             transition: border-color 0.2s;
         }
 
