@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venn Diagram Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+            margin: 10px;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+        }
+
+        #control-panel {
+            width: 300px;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 100;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        #control-panel.hidden {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #toggle-panel-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            cursor: pointer;
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #333;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        #toggle-panel-btn:hover {
+            background: #f8fafc;
+            transform: scale(1.05);
+        }
+
+        #toggle-panel-btn.hidden {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+                overflow: auto;
+            }
+
+            #control-panel {
+                width: 100%;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                order: -1;
+            }
+
+            #canvas-container {
+                width: 100%;
+                min-height: 300px;
+                margin: 10px;
+            }
+        }
+                min-height: 400px;
+            }
+        }
+
+        #control-panel h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        #expression-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: border-color 0.2s;
+        }
+
+        #expression-input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        #error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 5px;
+            min-height: 16px;
+        }
+
+        #visualize-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 15px;
+        }
+
+        #visualize-btn:hover {
+            background: #4f46e5;
+        }
+
+        .step-info {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            font-size: 12px;
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .step-type {
+            font-size: 11px;
+            padding: 3px 8px;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .step-description {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .settings-row .input-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .slider-container {
+            margin-bottom: 15px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-header label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .slider-value {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .shortcuts {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .shortcuts-title {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .shortcut {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .shortcut kbd {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 11px;
+        }
+
+        #region-labels-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        #region-labels-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        #region-labels-toggle label {
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .color-options, .pattern-options {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #1e293b;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #6366f1;
+        }
+
+        .pattern-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .pattern-option:hover {
+            background: #f8fafc;
+        }
+
+        .pattern-option.selected {
+            border-color: #6366f1;
+            background: #e0e7ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="venn-canvas" width="600" height="600"></canvas>
+
+        <div id="control-panel">
+            <h2>Venn Diagram Visualizer</h2>
+
+            <div class="input-group">
+                <label>Expression</label>
+                <input type="text" id="expression-input" value="A AND B AND C" placeholder="e.g., NOT A OR B AND C">
+                <div id="error-message"></div>
+            </div>
+
+            <button id="visualize-btn">Visualize</button>
+
+            <div class="step-info" id="step-info" style="display: none;">
+                <div class="step-header">
+                    <span class="step-number" id="step-number">Step 1 of 7</span>
+                    <span class="step-type" id="step-type">Parse</span>
+                </div>
+                <div class="step-description" id="step-description">
+                    Parsing the expression...
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prev-btn" disabled>◀ Prev</button>
+                <button class="nav-btn" id="play-btn">▶ Play</button>
+                <button class="nav-btn" id="next-btn" disabled>Next ▶</button>
+                <button class="nav-btn" id="reset-btn">R Reset</button>
+            </div>
+
+            <div class="settings-row">
+                <div class="input-group">
+                    <label>Color</label>
+                    <div class="color-options" id="color-options">
+                        <div class="color-option selected" data-color="#6366f1" style="background: #6366f1;"></div>
+                        <div class="color-option" data-color="#ef4444" style="background: #ef4444;"></div>
+                        <div class="color-option" data-color="#22c55e" style="background: #22c55e;"></div>
+                        <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+                        <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+                        <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+                        <div class="color-option" data-color="#14b8a6" style="background: #14b8a6;"></div>
+                        <div class="color-option" data-color="#64748b" style="background: #64748b;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-row">
+                <div class="input-group">
+                    <label>Pattern</label>
+                    <select id="pattern-select">
+                        <option value="solid">Solid Fill</option>
+                        <option value="diagonal">Diagonal Lines</option>
+                        <option value="crosshatch">Crosshatch</option>
+                        <option value="dots">Dots</option>
+                        <option value="waves">Waves</option>
+                        <option value="grid">Grid</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="slider-container">
+                <div class="slider-header">
+                    <label>Opacity</label>
+                    <span class="slider-value" id="opacity-value">60%</span>
+                </div>
+                <input type="range" id="opacity-slider" min="10" max="100" value="60">
+            </div>
+
+            <div id="region-labels-toggle">
+                <input type="checkbox" id="show-labels" checked>
+                <label for="show-labels">Show region labels</label>
+            </div>
+
+            <div class="shortcuts">
+                <div class="shortcuts-title">Keyboard Shortcuts</div>
+                <div class="shortcut"><span>Previous step</span><kbd>←</kbd></div>
+                <div class="shortcut"><span>Next step</span><kbd>→</kbd></div>
+                <div class="shortcut"><span>Play/Pause</span><kbd>Space</kbd></div>
+                <div class="shortcut"><span>Reset</span><kbd>R</kbd></div>
+            </div>
+
+            <button id="hide-panel-btn" style="margin-top: 15px; padding: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; width: 100%;">Hide Panel</button>
+        </div>
+
+        <button id="toggle-panel-btn" class="hidden">☰</button>
+    </div>
+
+    <script>
+        // ==================== TOKENIZER ====================
+        class Tokenizer {
+            constructor(expression) {
+                this.expression = expression;
+                this.pos = 0;
+                this.tokens = [];
+            }
+
+            tokenize() {
+                while (this.pos < this.expression.length) {
+                    const char = this.expression[this.pos];
+
+                    if (/\s/.test(char)) {
+                        this.pos++;
+                        continue;
+                    }
+
+                    if (/[A-Za-z]/.test(char)) {
+                        this.readIdentifier();
+                    } else if (char === '(') {
+                        this.tokens.push({ type: 'LPAREN', value: '(' });
+                        this.pos++;
+                    } else if (char === ')') {
+                        this.tokens.push({ type: 'RPAREN', value: ')' });
+                        this.pos++;
+                    } else {
+                        throw new Error(`Invalid character: ${char}`);
+                    }
+                }
+                return this.tokens;
+            }
+
+            readIdentifier() {
+                let identifier = '';
+                while (this.pos < this.expression.length && /[A-Za-z]/.test(this.expression[this.pos])) {
+                    identifier += this.expression[this.pos];
+                    this.pos++;
+                }
+
+                const upper = identifier.toUpperCase();
+
+                if (['AND', 'OR', 'NOT'].includes(upper)) {
+                    this.tokens.push({ type: upper, value: upper });
+                } else if (identifier.length === 1 && ['A', 'B', 'C'].includes(upper)) {
+                    this.tokens.push({ type: 'VARIABLE', value: upper });
+                } else {
+                    throw new Error(`Unknown identifier: ${identifier}`);
+                }
+            }
+        }
+
+        // ==================== PARSER ====================
+        class Parser {
+            constructor(tokens) {
+                this.tokens = tokens;
+                this.pos = 0;
+            }
+
+            parse() {
+                const ast = this.parseOr();
+                if (this.pos < this.tokens.length) {
+                    const token = this.tokens[this.pos];
+                    throw new Error(`Unexpected token: ${token.value}`);
+                }
+                return ast;
+            }
+
+            parseOr() {
+                let left = this.parseAnd();
+                while (this.match('OR')) {
+                    const right = this.parseAnd();
+                    left = { type: 'OR', left, right };
+                }
+                return left;
+            }
+
+            parseAnd() {
+                let left = this.parseNot();
+                while (this.match('AND')) {
+                    const right = this.parseNot();
+                    left = { type: 'AND', left, right };
+                }
+                return left;
+            }
+
+            parseNot() {
+                if (this.match('NOT')) {
+                    const operand = this.parseNot();
+                    return { type: 'NOT', operand };
+                }
+                return this.parsePrimary();
+            }
+
+            parsePrimary() {
+                if (this.match('VARIABLE')) {
+                    return { type: 'VARIABLE', value: this.tokens[this.pos - 1].value };
+                }
+                if (this.match('LPAREN')) {
+                    const expr = this.parseOr();
+                    if (!this.match('RPAREN')) {
+                        throw new Error('Missing closing parenthesis');
+                    }
+                    return expr;
+                }
+                throw new Error(`Unexpected token: ${this.tokens[this.pos]?.value || 'end of input'}`);
+            }
+
+            match(type) {
+                if (this.pos < this.tokens.length && this.tokens[this.pos].type === type) {
+                    this.pos++;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        // ==================== REGION MAPPER ====================
+        class RegionMapper {
+            static getRegionsForVariable(variable) {
+                switch (variable) {
+                    case 'A': return [1, 3, 5, 7];
+                    case 'B': return [2, 3, 6, 7];
+                    case 'C': return [4, 5, 6, 7];
+                    default: return [];
+                }
+            }
+
+            static getRegionsForAST(node) {
+                switch (node.type) {
+                    case 'VARIABLE':
+                        return this.getRegionsForVariable(node.value);
+                    case 'NOT':
+                        const notRegions = this.getRegionsForAST(node.operand);
+                        return [0, 1, 2, 3, 4, 5, 6, 7].filter(r => !notRegions.includes(r));
+                    case 'AND':
+                        const leftAnd = this.getRegionsForAST(node.left);
+                        const rightAnd = this.getRegionsForAST(node.right);
+                        return leftAnd.filter(r => rightAnd.includes(r));
+                    case 'OR':
+                        const leftOr = this.getRegionsForAST(node.left);
+                        const rightOr = this.getRegionsForAST(node.right);
+                        return [...new Set([...leftOr, ...rightOr])].sort((a, b) => a - b);
+                    default:
+                        return [];
+                }
+            }
+        }
+
+        // ==================== STEP GENERATOR ====================
+        class StepGenerator {
+            constructor() {
+                this.steps = [];
+            }
+
+            generateSteps(ast, originalExpression) {
+                this.steps = [];
+                this.breakDownExpression(ast);
+                return this.steps;
+            }
+
+            breakDownExpression(node, context = '') {
+                if (!node) return;
+
+                if (node.type === 'VARIABLE') {
+                    const regions = RegionMapper.getRegionsForAST(node);
+                    this.steps.push({
+                        stepNumber: this.steps.length + 1,
+                        type: 'Variable',
+                        description: `Evaluate ${node.value}`,
+                        expression: node.value,
+                        regions: regions,
+                        ast: node
+                    });
+                    return;
+                }
+
+                if (node.type === 'NOT') {
+                    // First, break down the operand to show all its steps
+                    this.breakDownExpression(node.operand, 'NOT');
+                    
+                    // Then add the negation step
+                    const regions = RegionMapper.getRegionsForAST(node);
+                    const operandExpr = this.astToString(node.operand);
+                    this.steps.push({
+                        stepNumber: this.steps.length + 1,
+                        type: 'Negation',
+                        description: `Apply NOT to result of (${operandExpr})`,
+                        expression: `NOT (${operandExpr})`,
+                        regions: regions,
+                        ast: node
+                    });
+                    return;
+                }
+
+                if (node.type === 'AND' || node.type === 'OR') {
+                    // Break down left side
+                    this.breakDownExpression(node.left);
+                    // Break down right side
+                    this.breakDownExpression(node.right);
+                    
+                    // Combine them
+                    const regions = RegionMapper.getRegionsForAST(node);
+                    const leftExpr = this.astToString(node.left);
+                    const rightExpr = this.astToString(node.right);
+                    
+                    this.steps.push({
+                        stepNumber: this.steps.length + 1,
+                        type: node.type === 'AND' ? 'Intersection' : 'Union',
+                        description: `Combine (${leftExpr}) ${node.type} (${rightExpr})`,
+                        expression: `(${leftExpr}) ${node.type} (${rightExpr})`,
+                        regions: regions,
+                        ast: node
+                    });
+                }
+            }
+
+            astToString(node) {
+                if (!node) return '';
+                if (node.type === 'VARIABLE') return node.value;
+                if (node.type === 'NOT') return `NOT ${this.astToString(node.operand)}`;
+                if (node.type === 'AND' || node.type === 'OR') {
+                    return `(${this.astToString(node.left)} ${node.type} ${this.astToString(node.right)})`;
+                }
+                return '';
+            }
+
+            extractVariables(node) {
+                if (!node) return [];
+                if (node.type === 'VARIABLE') return [node.value];
+                if (node.type === 'NOT') return this.extractVariables(node.operand);
+                if (node.type === 'AND' || node.type === 'OR') {
+                    return [...new Set([...this.extractVariables(node.left), ...this.extractVariables(node.right)])].sort();
+                }
+                return [];
+            }
+
+            describeRegions(regions) {
+                const names = {
+                    0: 'outside',
+                    1: 'A only',
+                    2: 'B only',
+                    3: 'A∩B',
+                    4: 'C only',
+                    5: 'A∩C',
+                    6: 'B∩C',
+                    7: 'A∩B∩C'
+                };
+                return regions.map(r => names[r]).join(', ');
+            }
+        }
+
+        // ==================== VENN RENDERER ====================
+        class VennRenderer {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.calculateDimensions();
+            }
+
+            calculateDimensions() {
+                const rect = this.canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.ctx.scale(dpr, dpr);
+
+                this.width = rect.width;
+                this.height = rect.height;
+
+                this.samplePadding = Math.min(this.width, this.height) * 0.08;
+                this.sampleRect = {
+                    x: this.samplePadding,
+                    y: this.samplePadding,
+                    width: this.width - this.samplePadding * 2,
+                    height: this.height - this.samplePadding * 2
+                };
+
+                const sampleCenterX = this.sampleRect.x + this.sampleRect.width / 2;
+                const sampleCenterY = this.sampleRect.y + this.sampleRect.height / 2;
+                const minDim = Math.min(this.sampleRect.width, this.sampleRect.height);
+
+                // Calculate max radius that fits within sample space
+                // For three circles in triangular arrangement, the max radius is ~0.28 of the min dimension
+                this.circleRadius = minDim * 0.28;
+
+                const offsetY = minDim * 0.15;
+                const offsetX = minDim * 0.18;
+
+                this.circleCenters = {
+                    A: { x: sampleCenterX, y: sampleCenterY - offsetY },
+                    B: { x: sampleCenterX - offsetX, y: sampleCenterY + offsetY },
+                    C: { x: sampleCenterX + offsetX, y: sampleCenterY + offsetY }
+                };
+
+                // Verify circles don't overflow
+                const maxDistA = Math.max(
+                    Math.abs(this.circleCenters.A.x - this.sampleRect.x),
+                    Math.abs(this.circleCenters.A.x - (this.sampleRect.x + this.sampleRect.width)),
+                    Math.abs(this.circleCenters.A.y - this.sampleRect.y),
+                    Math.abs(this.circleCenters.A.y - (this.sampleRect.y + this.sampleRect.height))
+                );
+                const maxDistB = Math.max(
+                    Math.abs(this.circleCenters.B.x - this.sampleRect.x),
+                    Math.abs(this.circleCenters.B.x - (this.sampleRect.x + this.sampleRect.width)),
+                    Math.abs(this.circleCenters.B.y - this.sampleRect.y),
+                    Math.abs(this.circleCenters.B.y - (this.sampleRect.y + this.sampleRect.height))
+                );
+                const maxDistC = Math.max(
+                    Math.abs(this.circleCenters.C.x - this.sampleRect.x),
+                    Math.abs(this.circleCenters.C.x - (this.sampleRect.x + this.sampleRect.width)),
+                    Math.abs(this.circleCenters.C.y - this.sampleRect.y),
+                    Math.abs(this.circleCenters.C.y - (this.sampleRect.y + this.sampleRect.height))
+                );
+
+                const minMaxDist = Math.min(maxDistA, maxDistB, maxDistC);
+                if (this.circleRadius > minMaxDist - 10) {
+                    this.circleRadius = minMaxDist - 10;
+                }
+
+                this.circleColors = {
+                    A: 'rgba(254, 202, 202, 0.3)',
+                    B: 'rgba(191, 219, 254, 0.3)',
+                    C: 'rgba(187, 247, 208, 0.3)'
+                };
+            }
+
+            resize() {
+                this.calculateDimensions();
+            }
+
+            render(shadedRegions, options = {}) {
+                const { color = '#6366f1', pattern = 'solid', opacity = 0.6, showLabels = true } = options;
+
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                this.drawSampleSpace();
+
+                shadedRegions.forEach(regionIndex => {
+                    this.drawRegion(regionIndex, { color, pattern, opacity });
+                });
+
+                this.drawCircleBoundaries();
+
+                if (showLabels) {
+                    this.drawLabels();
+                }
+
+                this.drawSetLabels();
+            }
+
+            drawSampleSpace() {
+                this.ctx.strokeStyle = '#1e293b';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([]);
+
+                this.ctx.strokeRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+
+                this.ctx.fillStyle = '#64748b';
+                this.ctx.font = 'italic 14px serif';
+                this.ctx.fillText('S', this.sampleRect.x + 12, this.sampleRect.y + 20);
+            }
+
+            drawCircleBoundaries() {
+                ['A', 'B', 'C'].forEach(set => {
+                    const center = this.circleCenters[set];
+                    this.ctx.beginPath();
+                    this.ctx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
+                    this.ctx.strokeStyle = '#1e293b';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+                });
+            }
+
+            getRegionCircles(regionIndex) {
+                const circles = {
+                    0: [],
+                    1: ['A'],
+                    2: ['B'],
+                    3: ['A', 'B'],
+                    4: ['C'],
+                    5: ['A', 'C'],
+                    6: ['B', 'C'],
+                    7: ['A', 'B', 'C']
+                };
+                return circles[regionIndex] || [];
+            }
+
+            drawRegion(regionIndex, { color, pattern, opacity }) {
+                const included = this.getRegionCircles(regionIndex);
+                const allCircles = ['A', 'B', 'C'];
+                const excluded = allCircles.filter(c => !included.includes(c));
+
+                // Create offscreen canvas
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = this.canvas.width;
+                tempCanvas.height = this.canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Match the scaling of the main context
+                const dpr = window.devicePixelRatio || 1;
+                tempCtx.scale(dpr, dpr);
+
+                tempCtx.save();
+
+                // 1. Clip to Included Regions
+                tempCtx.beginPath();
+                // Always clip to sample rect first
+                tempCtx.rect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+                tempCtx.clip();
+
+                if (included.length > 0) {
+                    included.forEach(set => {
+                        const center = this.circleCenters[set];
+                        tempCtx.beginPath();
+                        tempCtx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
+                        tempCtx.clip();
+                    });
+                }
+
+                // 2. Draw Pattern/Color (This fills the 'Included' area)
+                const rgbaColor = this.hexToRgba(color, opacity);
+
+                if (pattern === 'solid') {
+                    tempCtx.fillStyle = rgbaColor;
+                    tempCtx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+                } else {
+                    // Fill background with color
+                    tempCtx.fillStyle = rgbaColor;
+                    tempCtx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+
+                    // Draw pattern
+                    tempCtx.strokeStyle = color;
+                    tempCtx.lineWidth = 1;
+                    tempCtx.globalAlpha = 0.8;
+
+                    switch (pattern) {
+                        case 'diagonal':
+                            this.drawDiagonalLines(tempCtx);
+                            break;
+                        case 'crosshatch':
+                            this.drawDiagonalLines(tempCtx);
+                            this.drawDiagonalLines(tempCtx, true);
+                            break;
+                        case 'dots':
+                            this.drawDots(tempCtx);
+                            break;
+                        case 'waves':
+                            this.drawWaves(tempCtx);
+                            break;
+                        case 'grid':
+                            this.drawGrid(tempCtx);
+                            break;
+                    }
+                }
+
+                // 3. Remove Excluded Regions (Cut out holes)
+                // We use destination-out to erase pixels where excluded circles are
+                tempCtx.globalCompositeOperation = 'destination-out';
+                tempCtx.globalAlpha = 1.0; // Ensure full erasure
+
+                excluded.forEach(set => {
+                    const center = this.circleCenters[set];
+                    tempCtx.beginPath();
+                    tempCtx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
+                    // Fill the circle to erase it from the temp canvas
+                    tempCtx.fillStyle = '#000000'; 
+                    tempCtx.fill();
+                });
+
+                tempCtx.restore();
+
+                // 4. Draw the result to the main canvas
+                // Reset transform of main ctx to draw the canvas 1:1 in device pixels?
+                // The tempCanvas is sized to real pixels (width/height * dpr).
+                // The main ctx is scaled by dpr.
+                // If we drawImage(tempCanvas, 0, 0), it draws at (0,0) with size (width, height) in logical pixels.
+                // Because main ctx is scaled, drawing a huge image (scaled size) will be double scaled.
+                // 
+                // Correction: drawImage(image, dx, dy, dWidth, dHeight)
+                // If we draw it into the logical coordinate system:
+                // this.ctx.drawImage(tempCanvas, 0, 0, this.width, this.height);
+                // BUT tempCanvas has high res content.
+                // 
+                // Easier way: Reset transform temporarily on main ctx to draw 1:1 pixel mapping.
+                
+                this.ctx.save();
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity (pixel coordinates)
+                this.ctx.drawImage(tempCanvas, 0, 0);
+                this.ctx.restore();
+            }
+
+            hexToRgba(hex, alpha) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+
+            drawDiagonalLines(ctx, reverse = false) {
+                const spacing = 12;
+                const maxDim = Math.max(this.width, this.height) * 2;
+
+                ctx.beginPath();
+
+                for (let i = -maxDim; i < maxDim; i += spacing) {
+                    if (reverse) {
+                        ctx.moveTo(i, 0);
+                        ctx.lineTo(i + this.height, this.height);
+                    } else {
+                        ctx.moveTo(i, 0);
+                        ctx.lineTo(i - this.height, this.height);
+                    }
+                }
+
+                ctx.stroke();
+            }
+
+            drawDots(ctx) {
+                const spacing = 10;
+                ctx.beginPath();
+
+                for (let y = spacing / 2; y < this.height; y += spacing) {
+                    for (let x = spacing / 2; x < this.width; x += spacing) {
+                        ctx.moveTo(x + 1, y);
+                        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                    }
+                }
+
+                ctx.fill();
+            }
+
+            drawWaves(ctx) {
+                const spacing = 14;
+                ctx.beginPath();
+
+                for (let y = spacing / 2; y < this.height + spacing; y += spacing) {
+                    ctx.moveTo(0, y);
+
+                    for (let x = 0; x < this.width; x += 5) {
+                        const offset = Math.sin(x * 0.1) * 4;
+                        ctx.lineTo(x, y + offset);
+                    }
+                }
+
+                ctx.stroke();
+            }
+
+            drawGrid(ctx) {
+                const spacing = 15;
+                ctx.beginPath();
+
+                for (let x = spacing; x < this.width; x += spacing) {
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, this.height);
+                }
+
+                for (let y = spacing; y < this.height; y += spacing) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(this.width, y);
+                }
+
+                ctx.stroke();
+            }
+
+            drawLabels() {
+                const fontSize = Math.max(10, this.width * 0.018);
+                this.ctx.font = `${fontSize}px sans-serif`;
+                this.ctx.fillStyle = '#475569';
+                this.ctx.textAlign = 'center';
+
+                const a = this.circleCenters.A;
+                const b = this.circleCenters.B;
+                const c = this.circleCenters.C;
+                const r = this.circleRadius * 0.4;
+
+                const positions = {
+                    1: { x: a.x - r * 0.7, y: a.y - r * 0.4 },
+                    2: { x: b.x - r * 0.3, y: b.y + r * 0.2 },
+                    4: { x: c.x + r * 0.3, y: c.y + r * 0.2 },
+                    3: { x: (a.x + b.x) / 2 - r * 0.2, y: (a.y + b.y) / 2 },
+                    5: { x: (a.x + c.x) / 2 + r * 0.2, y: (a.y + c.y) / 2 },
+                    6: { x: (b.x + c.x) / 2, y: (b.y + c.y) / 2 - r * 0.1 },
+                    7: { x: (a.x + b.x + c.x) / 3, y: (a.y + b.y + c.y) / 3 }
+                };
+
+                Object.entries(positions).forEach(([region, pos]) => {
+                    const labels = { 1: 'A', 2: 'B', 4: 'C', 3: 'AB', 5: 'AC', 6: 'BC', 7: 'ABC' };
+                    this.ctx.fillText(labels[region], pos.x, pos.y);
+                });
+            }
+
+            drawSetLabels() {
+                const fontSize = Math.max(12, this.width * 0.028);
+                this.ctx.font = `bold ${fontSize}px sans-serif`;
+                this.ctx.fillStyle = '#1e293b';
+                this.ctx.textAlign = 'center';
+
+                const offset = this.circleRadius * 0.75;
+                this.ctx.fillText('A', this.circleCenters.A.x, this.circleCenters.A.y - offset);
+                this.ctx.fillText('B', this.circleCenters.B.x - offset * 0.65, this.circleCenters.B.y + offset * 0.85);
+                this.ctx.fillText('C', this.circleCenters.C.x + offset * 0.65, this.circleCenters.C.y + offset * 0.85);
+            }
+        }
+
+        // ==================== MAIN APPLICATION ====================
+        class VennVisualizer {
+            constructor() {
+                this.canvas = document.getElementById('venn-canvas');
+                this.renderer = new VennRenderer(this.canvas);
+                this.expressionInput = document.getElementById('expression-input');
+                this.errorMessage = document.getElementById('error-message');
+                this.visualizeBtn = document.getElementById('visualize-btn');
+                this.stepInfo = document.getElementById('step-info');
+                this.stepNumber = document.getElementById('step-number');
+                this.stepType = document.getElementById('step-type');
+                this.stepDescription = document.getElementById('step-description');
+                this.prevBtn = document.getElementById('prev-btn');
+                this.nextBtn = document.getElementById('next-btn');
+                this.playBtn = document.getElementById('play-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.opacitySlider = document.getElementById('opacity-slider');
+                this.opacityValue = document.getElementById('opacity-value');
+                this.patternSelect = document.getElementById('pattern-select');
+                this.showLabelsCheckbox = document.getElementById('show-labels');
+                this.controlPanel = document.getElementById('control-panel');
+                this.togglePanelBtn = document.getElementById('toggle-panel-btn');
+                this.hidePanelBtn = document.getElementById('hide-panel-btn');
+
+                this.steps = [];
+                this.currentStep = 0;
+                this.isPlaying = false;
+                this.playInterval = null;
+                this.panelVisible = true;
+
+                this.colorPalette = [
+                    '#6366f1', // blue
+                    '#ef4444', // red
+                    '#22c55e', // green
+                    '#f59e0b', // orange
+                    '#8b5cf6', // purple
+                    '#ec4899', // pink
+                    '#14b8a6', // teal
+                    '#64748b'  // gray
+                ];
+
+                this.patternOptions = ['solid', 'diagonal', 'crosshatch', 'dots', 'waves', 'grid'];
+
+                this.color = '#6366f1';
+                this.pattern = 'solid';
+                this.opacity = 0.6;
+                this.showLabels = true;
+                this.stepPatterns = [];
+
+                this.bindEvents();
+                this.initialRender();
+            }
+
+            bindEvents() {
+                this.visualizeBtn.addEventListener('click', () => this.visualize());
+                this.prevBtn.addEventListener('click', () => this.prevStep());
+                this.nextBtn.addEventListener('click', () => this.nextStep());
+                this.playBtn.addEventListener('click', () => this.togglePlay());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.togglePanelBtn.addEventListener('click', () => this.showPanel());
+                this.hidePanelBtn.addEventListener('click', () => this.hidePanel());
+
+                this.opacitySlider.addEventListener('input', (e) => {
+                    this.opacity = e.target.value / 100;
+                    this.opacityValue.textContent = `${e.target.value}%`;
+                    this.updateRender();
+                });
+
+                this.patternSelect.addEventListener('change', (e) => {
+                    this.pattern = e.target.value;
+                    this.updateRender();
+                });
+
+                this.showLabelsCheckbox.addEventListener('change', (e) => {
+                    this.showLabels = e.target.checked;
+                    this.updateRender();
+                });
+
+                document.querySelectorAll('.color-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                        this.color = option.dataset.color;
+                        this.updateRender();
+                    });
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.target === this.expressionInput) return;
+
+                    switch (e.key) {
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            this.prevStep();
+                            break;
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            this.nextStep();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.togglePlay();
+                            break;
+                        case 'r':
+                        case 'R':
+                            this.reset();
+                            break;
+                    }
+                });
+
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        this.renderer.resize();
+                        this.updateRender();
+                    }, 100);
+                });
+            }
+
+            initialRender() {
+                this.renderer.render([], {
+                    color: this.color,
+                    pattern: this.pattern,
+                    opacity: this.opacity,
+                    showLabels: this.showLabels
+                });
+            }
+
+            visualize() {
+                const expression = this.expressionInput.value.trim();
+
+                if (!expression) {
+                    this.errorMessage.textContent = 'Please enter an expression';
+                    return;
+                }
+
+                try {
+                    const tokenizer = new Tokenizer(expression);
+                    const tokens = tokenizer.tokenize();
+
+                    const parser = new Parser(tokens);
+                    const ast = parser.parse();
+
+                    const stepGenerator = new StepGenerator();
+                    this.steps = stepGenerator.generateSteps(ast, expression);
+
+                    // Generate random patterns for each step
+                    this.stepPatterns = this.steps.map(() => 
+                        this.patternOptions[Math.floor(Math.random() * this.patternOptions.length)]
+                    );
+
+                    // Start at the last step (final result)
+                    this.currentStep = this.steps.length - 1;
+                    this.errorMessage.textContent = '';
+
+                    if (this.steps.length > 0) {
+                        this.stepInfo.style.display = 'block';
+                        this.updateStepDisplay();
+                        this.updateNavigation();
+                    }
+                } catch (error) {
+                    this.errorMessage.textContent = error.message;
+                }
+            }
+
+            updateStepDisplay() {
+                if (this.currentStep >= this.steps.length) {
+                    this.currentStep = this.steps.length - 1;
+                }
+
+                if (this.currentStep < 0) {
+                    this.currentStep = 0;
+                }
+
+                const step = this.steps[this.currentStep];
+                const stepColor = this.colorPalette[this.currentStep % this.colorPalette.length];
+                const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
+
+                this.stepNumber.textContent = `Step ${this.currentStep + 1} of ${this.steps.length}`;
+                this.stepType.textContent = step.type;
+                this.stepDescription.textContent = step.description;
+
+                this.renderer.render(step.regions, {
+                    color: stepColor,
+                    pattern: stepPattern,
+                    opacity: this.opacity,
+                    showLabels: this.showLabels
+                });
+            }
+
+            updateRender() {
+                if (this.steps.length > 0 && this.currentStep < this.steps.length) {
+                    const step = this.steps[this.currentStep];
+                    const stepColor = this.colorPalette[this.currentStep % this.colorPalette.length];
+                    const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
+                    this.renderer.render(step.regions, {
+                        color: stepColor,
+                        pattern: stepPattern,
+                        opacity: this.opacity,
+                        showLabels: this.showLabels
+                    });
+                }
+            }
+
+            updateNavigation() {
+                this.prevBtn.disabled = this.currentStep === 0;
+                this.nextBtn.disabled = this.currentStep >= this.steps.length - 1;
+            }
+
+            prevStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.updateStepDisplay();
+                    this.updateNavigation();
+                }
+            }
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.updateStepDisplay();
+                    this.updateNavigation();
+                }
+            }
+
+            togglePlay() {
+                if (!this.isPlaying) {
+                    // Starting to play - reset to first step
+                    this.isPlaying = true;
+                    this.playBtn.textContent = '⏸ Pause';
+                    this.currentStep = 0;
+                    this.updateStepDisplay();
+                    this.updateNavigation();
+                    
+                    this.playInterval = setInterval(() => {
+                        if (this.currentStep < this.steps.length - 1) {
+                            this.nextStep();
+                        } else {
+                            this.stopPlay();
+                        }
+                    }, 2000);
+                } else {
+                    // Pausing
+                    this.stopPlay();
+                }
+            }
+
+            stopPlay() {
+                this.isPlaying = false;
+                this.playBtn.textContent = '▶ Play';
+                if (this.playInterval) {
+                    clearInterval(this.playInterval);
+                    this.playInterval = null;
+                }
+            }
+
+            reset() {
+                this.stopPlay();
+                this.currentStep = 0;
+                this.stepInfo.style.display = 'none';
+                this.initialRender();
+                this.updateNavigation();
+            }
+
+            hidePanel() {
+                this.panelVisible = false;
+                this.controlPanel.classList.add('hidden');
+                this.togglePanelBtn.classList.remove('hidden');
+            }
+
+            showPanel() {
+                this.panelVisible = true;
+                this.controlPanel.classList.remove('hidden');
+                this.togglePanelBtn.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new VennVisualizer();
+        });
+    </script>
+</body>
+</html>
