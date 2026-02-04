@@ -889,54 +889,106 @@
             }
 
             drawRegion(regionIndex, { color, pattern, opacity }) {
-                const circles = this.getRegionCircles(regionIndex);
+                const included = this.getRegionCircles(regionIndex);
+                const allCircles = ['A', 'B', 'C'];
+                const excluded = allCircles.filter(c => !included.includes(c));
 
-                this.ctx.save();
+                // Create offscreen canvas
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = this.canvas.width;
+                tempCanvas.height = this.canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Match the scaling of the main context
+                const dpr = window.devicePixelRatio || 1;
+                tempCtx.scale(dpr, dpr);
 
-                this.ctx.beginPath();
-                this.ctx.rect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
-                this.ctx.clip();
+                tempCtx.save();
 
-                circles.forEach(set => {
-                    const center = this.circleCenters[set];
-                    this.ctx.beginPath();
-                    this.ctx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
-                    this.ctx.clip();
-                });
+                // 1. Clip to Included Regions
+                tempCtx.beginPath();
+                // Always clip to sample rect first
+                tempCtx.rect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+                tempCtx.clip();
 
+                if (included.length > 0) {
+                    included.forEach(set => {
+                        const center = this.circleCenters[set];
+                        tempCtx.beginPath();
+                        tempCtx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
+                        tempCtx.clip();
+                    });
+                }
+
+                // 2. Draw Pattern/Color (This fills the 'Included' area)
                 const rgbaColor = this.hexToRgba(color, opacity);
 
                 if (pattern === 'solid') {
-                    this.ctx.fillStyle = rgbaColor;
-                    this.ctx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+                    tempCtx.fillStyle = rgbaColor;
+                    tempCtx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
                 } else {
-                    this.ctx.fillStyle = rgbaColor;
-                    this.ctx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+                    // Fill background with color
+                    tempCtx.fillStyle = rgbaColor;
+                    tempCtx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
 
-                    this.ctx.strokeStyle = color;
-                    this.ctx.lineWidth = 1;
-                    this.ctx.globalAlpha = 0.8;
+                    // Draw pattern
+                    tempCtx.strokeStyle = color;
+                    tempCtx.lineWidth = 1;
+                    tempCtx.globalAlpha = 0.8;
 
                     switch (pattern) {
                         case 'diagonal':
-                            this.drawDiagonalLines();
+                            this.drawDiagonalLines(tempCtx);
                             break;
                         case 'crosshatch':
-                            this.drawDiagonalLines();
-                            this.drawDiagonalLines(true);
+                            this.drawDiagonalLines(tempCtx);
+                            this.drawDiagonalLines(tempCtx, true);
                             break;
                         case 'dots':
-                            this.drawDots();
+                            this.drawDots(tempCtx);
                             break;
                         case 'waves':
-                            this.drawWaves();
+                            this.drawWaves(tempCtx);
                             break;
                         case 'grid':
-                            this.drawGrid();
+                            this.drawGrid(tempCtx);
                             break;
                     }
                 }
 
+                // 3. Remove Excluded Regions (Cut out holes)
+                // We use destination-out to erase pixels where excluded circles are
+                tempCtx.globalCompositeOperation = 'destination-out';
+                tempCtx.globalAlpha = 1.0; // Ensure full erasure
+
+                excluded.forEach(set => {
+                    const center = this.circleCenters[set];
+                    tempCtx.beginPath();
+                    tempCtx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
+                    // Fill the circle to erase it from the temp canvas
+                    tempCtx.fillStyle = '#000000'; 
+                    tempCtx.fill();
+                });
+
+                tempCtx.restore();
+
+                // 4. Draw the result to the main canvas
+                // Reset transform of main ctx to draw the canvas 1:1 in device pixels?
+                // The tempCanvas is sized to real pixels (width/height * dpr).
+                // The main ctx is scaled by dpr.
+                // If we drawImage(tempCanvas, 0, 0), it draws at (0,0) with size (width, height) in logical pixels.
+                // Because main ctx is scaled, drawing a huge image (scaled size) will be double scaled.
+                // 
+                // Correction: drawImage(image, dx, dy, dWidth, dHeight)
+                // If we draw it into the logical coordinate system:
+                // this.ctx.drawImage(tempCanvas, 0, 0, this.width, this.height);
+                // BUT tempCanvas has high res content.
+                // 
+                // Easier way: Reset transform temporarily on main ctx to draw 1:1 pixel mapping.
+                
+                this.ctx.save();
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity (pixel coordinates)
+                this.ctx.drawImage(tempCanvas, 0, 0);
                 this.ctx.restore();
             }
 
@@ -947,70 +999,70 @@
                 return `rgba(${r}, ${g}, ${b}, ${alpha})`;
             }
 
-            drawDiagonalLines(reverse = false) {
+            drawDiagonalLines(ctx, reverse = false) {
                 const spacing = 12;
                 const maxDim = Math.max(this.width, this.height) * 2;
 
-                this.ctx.beginPath();
+                ctx.beginPath();
 
                 for (let i = -maxDim; i < maxDim; i += spacing) {
                     if (reverse) {
-                        this.ctx.moveTo(i, 0);
-                        this.ctx.lineTo(i + this.height, this.height);
+                        ctx.moveTo(i, 0);
+                        ctx.lineTo(i + this.height, this.height);
                     } else {
-                        this.ctx.moveTo(i, 0);
-                        this.ctx.lineTo(i - this.height, this.height);
+                        ctx.moveTo(i, 0);
+                        ctx.lineTo(i - this.height, this.height);
                     }
                 }
 
-                this.ctx.stroke();
+                ctx.stroke();
             }
 
-            drawDots() {
+            drawDots(ctx) {
                 const spacing = 10;
-                this.ctx.beginPath();
+                ctx.beginPath();
 
                 for (let y = spacing / 2; y < this.height; y += spacing) {
                     for (let x = spacing / 2; x < this.width; x += spacing) {
-                        this.ctx.moveTo(x + 1, y);
-                        this.ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                        ctx.moveTo(x + 1, y);
+                        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
                     }
                 }
 
-                this.ctx.fill();
+                ctx.fill();
             }
 
-            drawWaves() {
+            drawWaves(ctx) {
                 const spacing = 14;
-                this.ctx.beginPath();
+                ctx.beginPath();
 
                 for (let y = spacing / 2; y < this.height + spacing; y += spacing) {
-                    this.ctx.moveTo(0, y);
+                    ctx.moveTo(0, y);
 
                     for (let x = 0; x < this.width; x += 5) {
                         const offset = Math.sin(x * 0.1) * 4;
-                        this.ctx.lineTo(x, y + offset);
+                        ctx.lineTo(x, y + offset);
                     }
                 }
 
-                this.ctx.stroke();
+                ctx.stroke();
             }
 
-            drawGrid() {
+            drawGrid(ctx) {
                 const spacing = 15;
-                this.ctx.beginPath();
+                ctx.beginPath();
 
                 for (let x = spacing; x < this.width; x += spacing) {
-                    this.ctx.moveTo(x, 0);
-                    this.ctx.lineTo(x, this.height);
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, this.height);
                 }
 
                 for (let y = spacing; y < this.height; y += spacing) {
-                    this.ctx.moveTo(0, y);
-                    this.ctx.lineTo(this.width, y);
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(this.width, y);
                 }
 
-                this.ctx.stroke();
+                ctx.stroke();
             }
 
             drawLabels() {
