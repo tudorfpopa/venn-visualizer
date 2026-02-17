@@ -119,9 +119,6 @@
                 margin: 10px;
             }
         }
-                min-height: 400px;
-            }
-        }
 
         #control-panel h2 {
             font-size: 16px;
@@ -162,24 +159,6 @@
             font-size: 12px;
             margin-top: 5px;
             min-height: 16px;
-        }
-
-        #visualize-btn {
-            width: 100%;
-            padding: 10px;
-            background: #6366f1;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 15px;
-        }
-
-        #visualize-btn:hover {
-            background: #4f46e5;
         }
 
         .step-info {
@@ -368,67 +347,140 @@
             cursor: pointer;
         }
 
-        .color-options, .pattern-options {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .color-option {
-            width: 28px;
-            height: 28px;
+        #expression-display {
+            min-height: 42px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
             border-radius: 6px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-
-        .color-option.selected {
-            border-color: #1e293b;
-            box-shadow: 0 0 0 2px white, 0 0 0 4px #6366f1;
-        }
-
-        .pattern-option {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            cursor: pointer;
+            font-size: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            background: #f8fafc;
+            color: #1e293b;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s;
+            flex-wrap: wrap;
+            gap: 1px;
+            word-break: break-all;
+            transition: border-color 0.2s;
         }
 
-        .pattern-option:hover {
-            background: #f8fafc;
-        }
-
-        .pattern-option.selected {
+        #expression-display:focus-within,
+        #expression-display.active {
             border-color: #6366f1;
+            background: #fff;
+        }
+
+        #expression-display .cursor {
+            display: inline-block;
+            color: #6366f1;
+            font-weight: 300;
+            animation: blink 1s step-end infinite;
+            margin-left: 1px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+        }
+
+        .symbol-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .symbol-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .sym-btn {
+            flex: 1;
+            padding: 10px 4px;
+            font-size: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #1e293b;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            user-select: none;
+        }
+
+        .sym-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .sym-btn:active {
+            transform: scale(0.93);
             background: #e0e7ff;
+            border-color: #6366f1;
+        }
+
+        .var-btn {
+            font-weight: 600;
+            color: #4338ca;
+            border-color: #c7d2fe;
+            background: #eef2ff;
+        }
+
+        .var-btn:hover {
+            background: #e0e7ff;
+            border-color: #a5b4fc;
+        }
+
+        .action-btn {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        #clear-btn {
+            color: #ef4444;
+            border-color: #fecaca;
+            background: #fff5f5;
+        }
+
+        #clear-btn:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
         }
     </style>
 </head>
 <body>
     <div id="canvas-container">
-        <canvas id="venn-canvas" width="600" height="600"></canvas>
+        <div id="venn-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;"></div>
+    </div>
 
-        <div id="control-panel">
+    <div id="control-panel">
             <h2>Venn Diagram Visualizer</h2>
 
             <div class="input-group">
                 <label>Expression</label>
-                <input type="text" id="expression-input" value="A AND B AND C" placeholder="e.g., NOT A OR B AND C">
+                <div id="expression-display"><span id="expression-text"></span><span class="cursor">|</span></div>
                 <div id="error-message"></div>
             </div>
 
-            <button id="visualize-btn">Visualize</button>
+            <div class="symbol-buttons">
+                <div class="symbol-row">
+                    <button class="sym-btn var-btn" data-insert="A">A</button>
+                    <button class="sym-btn var-btn" data-insert="B">B</button>
+                    <button class="sym-btn var-btn" data-insert="C">C</button>
+                    <button class="sym-btn" data-insert="′">′</button>
+                </div>
+                <div class="symbol-row">
+                    <button class="sym-btn" data-insert="∪">∪</button>
+                    <button class="sym-btn" data-insert="∩">∩</button>
+                    <button class="sym-btn" data-insert="(">(</button>
+                    <button class="sym-btn" data-insert=")">)</button>
+                </div>
+                <div class="symbol-row">
+                    <button class="sym-btn action-btn" id="clear-btn">Clear</button>
+                    <button class="sym-btn action-btn" id="backspace-btn">⌫</button>
+                </div>
+            </div>
 
             <div class="step-info" id="step-info" style="display: none;">
                 <div class="step-header">
@@ -445,36 +497,6 @@
                 <button class="nav-btn" id="play-btn">▶ Play</button>
                 <button class="nav-btn" id="next-btn" disabled>Next ▶</button>
                 <button class="nav-btn" id="reset-btn">R Reset</button>
-            </div>
-
-            <div class="settings-row">
-                <div class="input-group">
-                    <label>Color</label>
-                    <div class="color-options" id="color-options">
-                        <div class="color-option selected" data-color="#6366f1" style="background: #6366f1;"></div>
-                        <div class="color-option" data-color="#ef4444" style="background: #ef4444;"></div>
-                        <div class="color-option" data-color="#22c55e" style="background: #22c55e;"></div>
-                        <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
-                        <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
-                        <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
-                        <div class="color-option" data-color="#14b8a6" style="background: #14b8a6;"></div>
-                        <div class="color-option" data-color="#64748b" style="background: #64748b;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-row">
-                <div class="input-group">
-                    <label>Pattern</label>
-                    <select id="pattern-select">
-                        <option value="solid">Solid Fill</option>
-                        <option value="diagonal">Diagonal Lines</option>
-                        <option value="crosshatch">Crosshatch</option>
-                        <option value="dots">Dots</option>
-                        <option value="waves">Waves</option>
-                        <option value="grid">Grid</option>
-                    </select>
-                </div>
             </div>
 
             <div class="slider-container">
@@ -496,16 +518,17 @@
                 <div class="shortcut"><span>Next step</span><kbd>→</kbd></div>
                 <div class="shortcut"><span>Play/Pause</span><kbd>Space</kbd></div>
                 <div class="shortcut"><span>Reset</span><kbd>R</kbd></div>
+                <div class="shortcut"><span>Backspace</span><kbd>⌫</kbd></div>
             </div>
 
             <button id="hide-panel-btn" style="margin-top: 15px; padding: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; width: 100%;">Hide Panel</button>
         </div>
 
-        <button id="toggle-panel-btn" class="hidden">☰</button>
-    </div>
+    <button id="toggle-panel-btn" class="hidden">☰</button>
 
     <script>
         // ==================== TOKENIZER ====================
+        // Symbols: ∪ = union (OR), ∩ = intersection (AND), ′ or ' = complement (postfix NOT)
         class Tokenizer {
             constructor(expression) {
                 this.expression = expression;
@@ -522,8 +545,18 @@
                         continue;
                     }
 
-                    if (/[A-Za-z]/.test(char)) {
-                        this.readIdentifier();
+                    if (/[A-Ca-c]/.test(char)) {
+                        this.tokens.push({ type: 'VARIABLE', value: char.toUpperCase() });
+                        this.pos++;
+                    } else if (char === '∪') {
+                        this.tokens.push({ type: 'UNION', value: '∪' });
+                        this.pos++;
+                    } else if (char === '∩') {
+                        this.tokens.push({ type: 'INTERSECT', value: '∩' });
+                        this.pos++;
+                    } else if (char === '′' || char === "'") {
+                        this.tokens.push({ type: 'COMPLEMENT', value: '′' });
+                        this.pos++;
                     } else if (char === '(') {
                         this.tokens.push({ type: 'LPAREN', value: '(' });
                         this.pos++;
@@ -536,27 +569,15 @@
                 }
                 return this.tokens;
             }
-
-            readIdentifier() {
-                let identifier = '';
-                while (this.pos < this.expression.length && /[A-Za-z]/.test(this.expression[this.pos])) {
-                    identifier += this.expression[this.pos];
-                    this.pos++;
-                }
-
-                const upper = identifier.toUpperCase();
-
-                if (['AND', 'OR', 'NOT'].includes(upper)) {
-                    this.tokens.push({ type: upper, value: upper });
-                } else if (identifier.length === 1 && ['A', 'B', 'C'].includes(upper)) {
-                    this.tokens.push({ type: 'VARIABLE', value: upper });
-                } else {
-                    throw new Error(`Unknown identifier: ${identifier}`);
-                }
-            }
         }
 
         // ==================== PARSER ====================
+        // Grammar (precedence low → high):
+        //   expr       → union
+        //   union      → intersect ( ∪ intersect )*
+        //   intersect  → postfix   ( ∩ postfix   )*
+        //   postfix    → primary ′*
+        //   primary    → VARIABLE | '(' expr ')'
         class Parser {
             constructor(tokens) {
                 this.tokens = tokens;
@@ -564,38 +585,38 @@
             }
 
             parse() {
-                const ast = this.parseOr();
+                if (this.tokens.length === 0) throw new Error('Empty expression');
+                const ast = this.parseUnion();
                 if (this.pos < this.tokens.length) {
-                    const token = this.tokens[this.pos];
-                    throw new Error(`Unexpected token: ${token.value}`);
+                    throw new Error(`Unexpected token: ${this.tokens[this.pos].value}`);
                 }
                 return ast;
             }
 
-            parseOr() {
-                let left = this.parseAnd();
-                while (this.match('OR')) {
-                    const right = this.parseAnd();
+            parseUnion() {
+                let left = this.parseIntersect();
+                while (this.match('UNION')) {
+                    const right = this.parseIntersect();
                     left = { type: 'OR', left, right };
                 }
                 return left;
             }
 
-            parseAnd() {
-                let left = this.parseNot();
-                while (this.match('AND')) {
-                    const right = this.parseNot();
+            parseIntersect() {
+                let left = this.parsePostfix();
+                while (this.match('INTERSECT')) {
+                    const right = this.parsePostfix();
                     left = { type: 'AND', left, right };
                 }
                 return left;
             }
 
-            parseNot() {
-                if (this.match('NOT')) {
-                    const operand = this.parseNot();
-                    return { type: 'NOT', operand };
+            parsePostfix() {
+                let node = this.parsePrimary();
+                while (this.match('COMPLEMENT')) {
+                    node = { type: 'NOT', operand: node };
                 }
-                return this.parsePrimary();
+                return node;
             }
 
             parsePrimary() {
@@ -603,7 +624,7 @@
                     return { type: 'VARIABLE', value: this.tokens[this.pos - 1].value };
                 }
                 if (this.match('LPAREN')) {
-                    const expr = this.parseOr();
+                    const expr = this.parseUnion();
                     if (!this.match('RPAREN')) {
                         throw new Error('Missing closing parenthesis');
                     }
@@ -724,10 +745,9 @@
             astToString(node) {
                 if (!node) return '';
                 if (node.type === 'VARIABLE') return node.value;
-                if (node.type === 'NOT') return `NOT ${this.astToString(node.operand)}`;
-                if (node.type === 'AND' || node.type === 'OR') {
-                    return `(${this.astToString(node.left)} ${node.type} ${this.astToString(node.right)})`;
-                }
+                if (node.type === 'NOT') return `(${this.astToString(node.operand)})′`;
+                if (node.type === 'AND') return `(${this.astToString(node.left)} ∩ ${this.astToString(node.right)})`;
+                if (node.type === 'OR')  return `(${this.astToString(node.left)} ∪ ${this.astToString(node.right)})`;
                 return '';
             }
 
@@ -758,23 +778,22 @@
 
         // ==================== VENN RENDERER ====================
         class VennRenderer {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
+            constructor(container) {
+                this.container = container;
+                this.width = 600;
+                this.height = 600;
+                this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                this.svg.setAttribute("viewBox", `0 0 ${this.width} ${this.height}`);
+                this.svg.style.width = "100%";
+                this.svg.style.height = "100%";
+                this.container.appendChild(this.svg);
+
                 this.calculateDimensions();
+                this.createDefinitions();
+                this.createRegionElements();
             }
 
             calculateDimensions() {
-                const rect = this.canvas.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-
-                this.canvas.width = rect.width * dpr;
-                this.canvas.height = rect.height * dpr;
-                this.ctx.scale(dpr, dpr);
-
-                this.width = rect.width;
-                this.height = rect.height;
-
                 this.samplePadding = Math.min(this.width, this.height) * 0.08;
                 this.sampleRect = {
                     x: this.samplePadding,
@@ -787,10 +806,7 @@
                 const sampleCenterY = this.sampleRect.y + this.sampleRect.height / 2;
                 const minDim = Math.min(this.sampleRect.width, this.sampleRect.height);
 
-                // Calculate max radius that fits within sample space
-                // For three circles in triangular arrangement, the max radius is ~0.28 of the min dimension
                 this.circleRadius = minDim * 0.28;
-
                 const offsetY = minDim * 0.15;
                 const offsetX = minDim * 0.18;
 
@@ -799,84 +815,149 @@
                     B: { x: sampleCenterX - offsetX, y: sampleCenterY + offsetY },
                     C: { x: sampleCenterX + offsetX, y: sampleCenterY + offsetY }
                 };
-
-                // Verify circles don't overflow
-                const maxDistA = Math.max(
-                    Math.abs(this.circleCenters.A.x - this.sampleRect.x),
-                    Math.abs(this.circleCenters.A.x - (this.sampleRect.x + this.sampleRect.width)),
-                    Math.abs(this.circleCenters.A.y - this.sampleRect.y),
-                    Math.abs(this.circleCenters.A.y - (this.sampleRect.y + this.sampleRect.height))
-                );
-                const maxDistB = Math.max(
-                    Math.abs(this.circleCenters.B.x - this.sampleRect.x),
-                    Math.abs(this.circleCenters.B.x - (this.sampleRect.x + this.sampleRect.width)),
-                    Math.abs(this.circleCenters.B.y - this.sampleRect.y),
-                    Math.abs(this.circleCenters.B.y - (this.sampleRect.y + this.sampleRect.height))
-                );
-                const maxDistC = Math.max(
-                    Math.abs(this.circleCenters.C.x - this.sampleRect.x),
-                    Math.abs(this.circleCenters.C.x - (this.sampleRect.x + this.sampleRect.width)),
-                    Math.abs(this.circleCenters.C.y - this.sampleRect.y),
-                    Math.abs(this.circleCenters.C.y - (this.sampleRect.y + this.sampleRect.height))
-                );
-
-                const minMaxDist = Math.min(maxDistA, maxDistB, maxDistC);
-                if (this.circleRadius > minMaxDist - 10) {
-                    this.circleRadius = minMaxDist - 10;
-                }
-
-                this.circleColors = {
-                    A: 'rgba(254, 202, 202, 0.3)',
-                    B: 'rgba(191, 219, 254, 0.3)',
-                    C: 'rgba(187, 247, 208, 0.3)'
-                };
             }
 
-            resize() {
-                this.calculateDimensions();
-            }
+            createDefinitions() {
+                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
 
-            render(shadedRegions, options = {}) {
-                const { color = '#6366f1', pattern = 'solid', opacity = 0.6, showLabels = true } = options;
-
-                this.ctx.clearRect(0, 0, this.width, this.height);
-
-                this.drawSampleSpace();
-
-                shadedRegions.forEach(regionIndex => {
-                    this.drawRegion(regionIndex, { color, pattern, opacity });
+                // Clip Paths
+                ['A', 'B', 'C'].forEach(key => {
+                    const clip = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
+                    clip.id = `clip-${key}`;
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", this.circleCenters[key].x);
+                    circle.setAttribute("cy", this.circleCenters[key].y);
+                    circle.setAttribute("r", this.circleRadius);
+                    clip.appendChild(circle);
+                    defs.appendChild(clip);
                 });
 
-                this.drawCircleBoundaries();
+                // Patterns
+                const createPattern = (id, width, height, content) => {
+                    const p = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+                    p.setAttribute("id", id);
+                    p.setAttribute("patternUnits", "userSpaceOnUse");
+                    p.setAttribute("width", width);
+                    p.setAttribute("height", height);
+                    p.innerHTML = content;
+                    defs.appendChild(p);
+                };
 
-                if (showLabels) {
-                    this.drawLabels();
+                // Base templates use COLOR_PLACEHOLDER, substituted at render time
+                this.patternTemplates = {
+                    diagonal:   { w: 10, h: 10, content: (c) => `<path d="M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2" stroke="${c}" stroke-width="1.5" />` },
+                    crosshatch: { w: 10, h: 10, content: (c) => `<path d="M0,0 l10,10 M10,0 l-10,10" stroke="${c}" stroke-width="1.5" />` },
+                    dots:       { w: 10, h: 10, content: (c) => `<circle cx="5" cy="5" r="2" fill="${c}" />` },
+                    waves:      { w: 20, h: 10, content: (c) => `<path d="M0,5 Q5,0 10,5 T20,5" fill="none" stroke="${c}" stroke-width="1.5" />` },
+                    grid:       { w: 15, h: 15, content: (c) => `<path d="M 15 0 L 0 0 0 15" fill="none" stroke="${c}" stroke-width="1.5" />` },
+                };
+
+                this.svg.appendChild(defs);
+            }
+
+            createRegionElements() {
+                // Background (Sample Space)
+                const sampleG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const sampleRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                sampleRect.setAttribute("x", this.sampleRect.x);
+                sampleRect.setAttribute("y", this.sampleRect.y);
+                sampleRect.setAttribute("width", this.sampleRect.width);
+                sampleRect.setAttribute("height", this.sampleRect.height);
+                sampleRect.setAttribute("fill", "none");
+                sampleRect.setAttribute("stroke", "#1e293b");
+                sampleRect.setAttribute("stroke-width", "2");
+                sampleG.appendChild(sampleRect);
+
+                const sampleText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                sampleText.setAttribute("x", this.sampleRect.x + 12);
+                sampleText.setAttribute("y", this.sampleRect.y + 20);
+                sampleText.setAttribute("fill", "#64748b");
+                sampleText.textContent = "S";
+                sampleText.style.font = "italic 14px serif";
+                sampleG.appendChild(sampleText);
+                this.svg.appendChild(sampleG);
+
+                // Regions Layer
+                this.regionsLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                this.svg.appendChild(this.regionsLayer);
+
+                this.regionElements = {};
+                for (let i = 0; i < 8; i++) {
+                    const el = this.buildRegionElement(i);
+                    el.style.display = 'none';
+                    this.regionsLayer.appendChild(el);
+                    this.regionElements[i] = el;
                 }
 
+                // Boundaries
+                const boundariesG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                ['A', 'B', 'C'].forEach(key => {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", this.circleCenters[key].x);
+                    circle.setAttribute("cy", this.circleCenters[key].y);
+                    circle.setAttribute("r", this.circleRadius);
+                    circle.setAttribute("fill", "none");
+                    circle.setAttribute("stroke", "#1e293b");
+                    circle.setAttribute("stroke-width", "2");
+                    boundariesG.appendChild(circle);
+                });
+                this.svg.appendChild(boundariesG);
+
+                // Labels Layer
+                this.labelsLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                this.svg.appendChild(this.labelsLayer);
+                
                 this.drawSetLabels();
             }
 
-            drawSampleSpace() {
-                this.ctx.strokeStyle = '#1e293b';
-                this.ctx.lineWidth = 2;
-                this.ctx.setLineDash([]);
+            buildRegionElement(regionIndex) {
+                const included = this.getRegionCircles(regionIndex);
+                const all = ['A', 'B', 'C'];
+                const excluded = all.filter(x => !included.includes(x));
 
-                this.ctx.strokeRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
+                let content = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                content.setAttribute("x", this.sampleRect.x);
+                content.setAttribute("y", this.sampleRect.y);
+                content.setAttribute("width", this.sampleRect.width);
+                content.setAttribute("height", this.sampleRect.height);
+                content.classList.add("region-fill-rect");
 
-                this.ctx.fillStyle = '#64748b';
-                this.ctx.font = 'italic 14px serif';
-                this.ctx.fillText('S', this.sampleRect.x + 12, this.sampleRect.y + 20);
-            }
+                if (excluded.length > 0) {
+                    const maskId = `mask-exclude-${excluded.join('')}`;
+                    if (!document.getElementById(maskId)) {
+                        const mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
+                        mask.id = maskId;
+                        
+                        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                        bg.setAttribute("x", 0);
+                        bg.setAttribute("y", 0);
+                        bg.setAttribute("width", "100%");
+                        bg.setAttribute("height", "100%");
+                        bg.setAttribute("fill", "white");
+                        mask.appendChild(bg);
 
-            drawCircleBoundaries() {
-                ['A', 'B', 'C'].forEach(set => {
-                    const center = this.circleCenters[set];
-                    this.ctx.beginPath();
-                    this.ctx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
-                    this.ctx.strokeStyle = '#1e293b';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.stroke();
+                        excluded.forEach(key => {
+                            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                            c.setAttribute("cx", this.circleCenters[key].x);
+                            c.setAttribute("cy", this.circleCenters[key].y);
+                            c.setAttribute("r", this.circleRadius);
+                            c.setAttribute("fill", "black");
+                            mask.appendChild(c);
+                        });
+                        this.svg.querySelector("defs").appendChild(mask);
+                    }
+                    content.setAttribute("mask", `url(#${maskId})`);
+                }
+
+                let root = content;
+                included.forEach(key => {
+                    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    g.setAttribute("clip-path", `url(#clip-${key})`);
+                    g.appendChild(root);
+                    root = g;
                 });
+
+                return root;
             }
 
             getRegionCircles(regionIndex) {
@@ -893,231 +974,129 @@
                 return circles[regionIndex] || [];
             }
 
-            drawRegion(regionIndex, { color, pattern, opacity }) {
-                const included = this.getRegionCircles(regionIndex);
-                const allCircles = ['A', 'B', 'C'];
-                const excluded = allCircles.filter(c => !included.includes(c));
+            resize() {
+                // Not needed for SVG
+            }
 
-                // Create offscreen canvas
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = this.canvas.width;
-                tempCanvas.height = this.canvas.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                // Match the scaling of the main context
-                const dpr = window.devicePixelRatio || 1;
-                tempCtx.scale(dpr, dpr);
+            render(shadedRegions, options = {}) {
+                const { color = '#6366f1', pattern = 'solid', opacity = 0.6, showLabels = true } = options;
 
-                tempCtx.save();
+                Object.values(this.regionElements).forEach(el => el.style.display = 'none');
 
-                // 1. Clip to Included Regions
-                tempCtx.beginPath();
-                // Always clip to sample rect first
-                tempCtx.rect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
-                tempCtx.clip();
-
-                if (included.length > 0) {
-                    included.forEach(set => {
-                        const center = this.circleCenters[set];
-                        tempCtx.beginPath();
-                        tempCtx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
-                        tempCtx.clip();
-                    });
-                }
-
-                // 2. Draw Pattern/Color (This fills the 'Included' area)
-                const rgbaColor = this.hexToRgba(color, opacity);
-
-                if (pattern === 'solid') {
-                    tempCtx.fillStyle = rgbaColor;
-                    tempCtx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
-                } else {
-                    // Fill background with color
-                    tempCtx.fillStyle = rgbaColor;
-                    tempCtx.fillRect(this.sampleRect.x, this.sampleRect.y, this.sampleRect.width, this.sampleRect.height);
-
-                    // Draw pattern
-                    tempCtx.strokeStyle = color;
-                    tempCtx.lineWidth = 1;
-                    tempCtx.globalAlpha = 0.8;
-
-                    switch (pattern) {
-                        case 'diagonal':
-                            this.drawDiagonalLines(tempCtx);
-                            break;
-                        case 'crosshatch':
-                            this.drawDiagonalLines(tempCtx);
-                            this.drawDiagonalLines(tempCtx, true);
-                            break;
-                        case 'dots':
-                            this.drawDots(tempCtx);
-                            break;
-                        case 'waves':
-                            this.drawWaves(tempCtx);
-                            break;
-                        case 'grid':
-                            this.drawGrid(tempCtx);
-                            break;
+                // For non-solid patterns, ensure a color-baked pattern clone exists in defs
+                let patternFillRef = color;
+                if (pattern !== 'solid') {
+                    const safeColor = color.replace('#', '');
+                    const patternId = `pattern-${pattern}-${safeColor}`;
+                    if (!this.svg.querySelector(`#${patternId}`)) {
+                        const tmpl = this.patternTemplates[pattern];
+                        if (tmpl) {
+                            const p = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+                            p.setAttribute("id", patternId);
+                            p.setAttribute("patternUnits", "userSpaceOnUse");
+                            p.setAttribute("width", tmpl.w);
+                            p.setAttribute("height", tmpl.h);
+                            p.innerHTML = tmpl.content(color);
+                            this.svg.querySelector("defs").appendChild(p);
+                        }
                     }
+                    patternFillRef = `url(#pattern-${pattern}-${safeColor})`;
                 }
 
-                // 3. Remove Excluded Regions (Cut out holes)
-                // We use destination-out to erase pixels where excluded circles are
-                tempCtx.globalCompositeOperation = 'destination-out';
-                tempCtx.globalAlpha = 1.0; // Ensure full erasure
+                shadedRegions.forEach(index => {
+                    const el = this.regionElements[index];
+                    if (el) {
+                        el.style.display = 'inline';
 
-                excluded.forEach(set => {
-                    const center = this.circleCenters[set];
-                    tempCtx.beginPath();
-                    tempCtx.arc(center.x, center.y, this.circleRadius, 0, Math.PI * 2);
-                    // Fill the circle to erase it from the temp canvas
-                    tempCtx.fillStyle = '#000000'; 
-                    tempCtx.fill();
+                        // Find the rect to update style
+                        let rect = el;
+                        while (rect && !rect.classList?.contains("region-fill-rect")) {
+                            rect = rect.firstElementChild;
+                        }
+
+                        if (rect) {
+                            rect.setAttribute("fill", patternFillRef);
+                            rect.setAttribute("fill-opacity", opacity);
+                        }
+                    }
                 });
 
-                tempCtx.restore();
-
-                // 4. Draw the result to the main canvas
-                // Reset transform of main ctx to draw the canvas 1:1 in device pixels?
-                // The tempCanvas is sized to real pixels (width/height * dpr).
-                // The main ctx is scaled by dpr.
-                // If we drawImage(tempCanvas, 0, 0), it draws at (0,0) with size (width, height) in logical pixels.
-                // Because main ctx is scaled, drawing a huge image (scaled size) will be double scaled.
-                // 
-                // Correction: drawImage(image, dx, dy, dWidth, dHeight)
-                // If we draw it into the logical coordinate system:
-                // this.ctx.drawImage(tempCanvas, 0, 0, this.width, this.height);
-                // BUT tempCanvas has high res content.
-                // 
-                // Easier way: Reset transform temporarily on main ctx to draw 1:1 pixel mapping.
-                
-                this.ctx.save();
-                this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset to identity (pixel coordinates)
-                this.ctx.drawImage(tempCanvas, 0, 0);
-                this.ctx.restore();
-            }
-
-            hexToRgba(hex, alpha) {
-                const r = parseInt(hex.slice(1, 3), 16);
-                const g = parseInt(hex.slice(3, 5), 16);
-                const b = parseInt(hex.slice(5, 7), 16);
-                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-            }
-
-            drawDiagonalLines(ctx, reverse = false) {
-                const spacing = 12;
-                const maxDim = Math.max(this.width, this.height) * 2;
-
-                ctx.beginPath();
-
-                for (let i = -maxDim; i < maxDim; i += spacing) {
-                    if (reverse) {
-                        ctx.moveTo(i, 0);
-                        ctx.lineTo(i + this.height, this.height);
-                    } else {
-                        ctx.moveTo(i, 0);
-                        ctx.lineTo(i - this.height, this.height);
-                    }
+                const labelsGroup = this.svg.querySelector("#region-labels-group");
+                if (labelsGroup) {
+                    labelsGroup.style.display = showLabels ? 'inline' : 'none';
+                } else if (showLabels) {
+                    this.drawLabels();
                 }
-
-                ctx.stroke();
-            }
-
-            drawDots(ctx) {
-                const spacing = 10;
-                ctx.beginPath();
-
-                for (let y = spacing / 2; y < this.height; y += spacing) {
-                    for (let x = spacing / 2; x < this.width; x += spacing) {
-                        ctx.moveTo(x + 1, y);
-                        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                    }
-                }
-
-                ctx.fill();
-            }
-
-            drawWaves(ctx) {
-                const spacing = 14;
-                ctx.beginPath();
-
-                for (let y = spacing / 2; y < this.height + spacing; y += spacing) {
-                    ctx.moveTo(0, y);
-
-                    for (let x = 0; x < this.width; x += 5) {
-                        const offset = Math.sin(x * 0.1) * 4;
-                        ctx.lineTo(x, y + offset);
-                    }
-                }
-
-                ctx.stroke();
-            }
-
-            drawGrid(ctx) {
-                const spacing = 15;
-                ctx.beginPath();
-
-                for (let x = spacing; x < this.width; x += spacing) {
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, this.height);
-                }
-
-                for (let y = spacing; y < this.height; y += spacing) {
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(this.width, y);
-                }
-
-                ctx.stroke();
             }
 
             drawLabels() {
-                const fontSize = Math.max(10, this.width * 0.018);
-                this.ctx.font = `${fontSize}px sans-serif`;
-                this.ctx.fillStyle = '#475569';
-                this.ctx.textAlign = 'center';
+                let g = this.svg.querySelector("#region-labels-group");
+                if (!g) {
+                    g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                    g.id = "region-labels-group";
+                    this.labelsLayer.appendChild(g);
 
-                const a = this.circleCenters.A;
-                const b = this.circleCenters.B;
-                const c = this.circleCenters.C;
-                const r = this.circleRadius * 0.4;
+                    const fontSize = Math.max(10, this.width * 0.018);
+                    
+                    const a = this.circleCenters.A;
+                    const b = this.circleCenters.B;
+                    const c = this.circleCenters.C;
+                    const r = this.circleRadius * 0.4;
 
-                const positions = {
-                    1: { x: a.x - r * 0.7, y: a.y - r * 0.4 },
-                    2: { x: b.x - r * 0.3, y: b.y + r * 0.2 },
-                    4: { x: c.x + r * 0.3, y: c.y + r * 0.2 },
-                    3: { x: (a.x + b.x) / 2 - r * 0.2, y: (a.y + b.y) / 2 },
-                    5: { x: (a.x + c.x) / 2 + r * 0.2, y: (a.y + c.y) / 2 },
-                    6: { x: (b.x + c.x) / 2, y: (b.y + c.y) / 2 - r * 0.1 },
-                    7: { x: (a.x + b.x + c.x) / 3, y: (a.y + b.y + c.y) / 3 }
-                };
+                    const positions = {
+                        1: { x: a.x - r * 0.7, y: a.y - r * 0.4 },
+                        2: { x: b.x - r * 0.3, y: b.y + r * 0.2 },
+                        4: { x: c.x + r * 0.3, y: c.y + r * 0.2 },
+                        3: { x: (a.x + b.x) / 2 - r * 0.2, y: (a.y + b.y) / 2 },
+                        5: { x: (a.x + c.x) / 2 + r * 0.2, y: (a.y + c.y) / 2 },
+                        6: { x: (b.x + c.x) / 2, y: (b.y + c.y) / 2 + r * 0.8 },
+                        7: { x: (a.x + b.x + c.x) / 3, y: (a.y + b.y + c.y) / 3 }
+                    };
 
-                Object.entries(positions).forEach(([region, pos]) => {
                     const labels = { 1: 'A', 2: 'B', 4: 'C', 3: 'AB', 5: 'AC', 6: 'BC', 7: 'ABC' };
-                    this.ctx.fillText(labels[region], pos.x, pos.y);
-                });
+
+                    Object.entries(positions).forEach(([region, pos]) => {
+                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        text.setAttribute("x", pos.x);
+                        text.setAttribute("y", pos.y);
+                        text.setAttribute("text-anchor", "middle");
+                        text.setAttribute("fill", "#475569");
+                        text.style.font = `${fontSize}px sans-serif`;
+                        text.textContent = labels[region];
+                        g.appendChild(text);
+                    });
+                }
+                g.style.display = 'inline';
             }
 
             drawSetLabels() {
                 const fontSize = Math.max(12, this.width * 0.028);
-                this.ctx.font = `bold ${fontSize}px sans-serif`;
-                this.ctx.fillStyle = '#1e293b';
-                this.ctx.textAlign = 'center';
-
                 const offset = this.circleRadius * 0.75;
-                this.ctx.fillText('A', this.circleCenters.A.x, this.circleCenters.A.y - offset);
-                this.ctx.fillText('B', this.circleCenters.B.x - offset * 0.65, this.circleCenters.B.y + offset * 0.85);
-                this.ctx.fillText('C', this.circleCenters.C.x + offset * 0.65, this.circleCenters.C.y + offset * 0.85);
+                
+                const createLabel = (text, x, y) => {
+                    const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    t.setAttribute("x", x);
+                    t.setAttribute("y", y);
+                    t.setAttribute("text-anchor", "middle");
+                    t.setAttribute("fill", "#1e293b");
+                    t.style.font = `bold ${fontSize}px sans-serif`;
+                    t.textContent = text;
+                    this.labelsLayer.appendChild(t);
+                };
+
+                createLabel('A', this.circleCenters.A.x, this.circleCenters.A.y - offset);
+                createLabel('B', this.circleCenters.B.x - offset * 0.65, this.circleCenters.B.y + offset * 0.85);
+                createLabel('C', this.circleCenters.C.x + offset * 0.65, this.circleCenters.C.y + offset * 0.85);
             }
         }
 
         // ==================== MAIN APPLICATION ====================
         class VennVisualizer {
             constructor() {
-                this.canvas = document.getElementById('venn-canvas');
-                this.renderer = new VennRenderer(this.canvas);
-                this.expressionInput = document.getElementById('expression-input');
+                this.container = document.getElementById('venn-container');
+                this.renderer = new VennRenderer(this.container);
+                this.expressionText = document.getElementById('expression-text');
                 this.errorMessage = document.getElementById('error-message');
-                this.visualizeBtn = document.getElementById('visualize-btn');
                 this.stepInfo = document.getElementById('step-info');
                 this.stepNumber = document.getElementById('step-number');
                 this.stepType = document.getElementById('step-type');
@@ -1128,11 +1107,13 @@
                 this.resetBtn = document.getElementById('reset-btn');
                 this.opacitySlider = document.getElementById('opacity-slider');
                 this.opacityValue = document.getElementById('opacity-value');
-                this.patternSelect = document.getElementById('pattern-select');
                 this.showLabelsCheckbox = document.getElementById('show-labels');
                 this.controlPanel = document.getElementById('control-panel');
                 this.togglePanelBtn = document.getElementById('toggle-panel-btn');
                 this.hidePanelBtn = document.getElementById('hide-panel-btn');
+
+                // Expression state — built by symbol buttons
+                this.expression = '';
 
                 this.steps = [];
                 this.currentStep = 0;
@@ -1141,20 +1122,12 @@
                 this.panelVisible = true;
 
                 this.colorPalette = [
-                    '#6366f1', // blue
-                    '#ef4444', // red
-                    '#22c55e', // green
-                    '#f59e0b', // orange
-                    '#8b5cf6', // purple
-                    '#ec4899', // pink
-                    '#14b8a6', // teal
-                    '#64748b'  // gray
+                    '#6366f1', '#ef4444', '#22c55e', '#f59e0b',
+                    '#8b5cf6', '#ec4899', '#14b8a6', '#64748b'
                 ];
 
                 this.patternOptions = ['solid', 'diagonal', 'crosshatch', 'dots', 'waves', 'grid'];
 
-                this.color = '#6366f1';
-                this.pattern = 'solid';
                 this.opacity = 0.6;
                 this.showLabels = true;
                 this.stepPatterns = [];
@@ -1163,87 +1136,55 @@
                 this.initialRender();
             }
 
-            bindEvents() {
-                this.visualizeBtn.addEventListener('click', () => this.visualize());
-                this.prevBtn.addEventListener('click', () => this.prevStep());
-                this.nextBtn.addEventListener('click', () => this.nextStep());
-                this.playBtn.addEventListener('click', () => this.togglePlay());
-                this.resetBtn.addEventListener('click', () => this.reset());
-                this.togglePanelBtn.addEventListener('click', () => this.showPanel());
-                this.hidePanelBtn.addEventListener('click', () => this.hidePanel());
+            // Append a symbol to the expression and re-evaluate
+            insertSymbol(sym) {
+                this.expression += sym;
+                this.expressionText.textContent = this.expression;
+                this.errorMessage.textContent = '';
+                this.visualize();
+            }
 
-                this.opacitySlider.addEventListener('input', (e) => {
-                    this.opacity = e.target.value / 100;
-                    this.opacityValue.textContent = `${e.target.value}%`;
-                    this.updateRender();
-                });
+            // Remove last character and re-evaluate
+            backspace() {
+                if (this.expression.length === 0) return;
+                // Handle multi-byte characters (∪ ∩ ′ are single Unicode code points)
+                this.expression = [...this.expression].slice(0, -1).join('');
+                this.expressionText.textContent = this.expression;
+                this.errorMessage.textContent = '';
+                if (this.expression.length === 0) {
+                    this.steps = [];
+                    this.stepInfo.style.display = 'none';
+                    this.initialRender();
+                    this.updateNavigation();
+                } else {
+                    this.visualize();
+                }
+            }
 
-                this.patternSelect.addEventListener('change', (e) => {
-                    this.pattern = e.target.value;
-                    this.updateRender();
-                });
-
-                this.showLabelsCheckbox.addEventListener('change', (e) => {
-                    this.showLabels = e.target.checked;
-                    this.updateRender();
-                });
-
-                document.querySelectorAll('.color-option').forEach(option => {
-                    option.addEventListener('click', () => {
-                        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-                        option.classList.add('selected');
-                        this.color = option.dataset.color;
-                        this.updateRender();
-                    });
-                });
-
-                document.addEventListener('keydown', (e) => {
-                    if (e.target === this.expressionInput) return;
-
-                    switch (e.key) {
-                        case 'ArrowLeft':
-                            e.preventDefault();
-                            this.prevStep();
-                            break;
-                        case 'ArrowRight':
-                            e.preventDefault();
-                            this.nextStep();
-                            break;
-                        case ' ':
-                            e.preventDefault();
-                            this.togglePlay();
-                            break;
-                        case 'r':
-                        case 'R':
-                            this.reset();
-                            break;
-                    }
-                });
-
-                let resizeTimeout;
-                window.addEventListener('resize', () => {
-                    clearTimeout(resizeTimeout);
-                    resizeTimeout = setTimeout(() => {
-                        this.renderer.resize();
-                        this.updateRender();
-                    }, 100);
-                });
+            // Clear the entire expression
+            clearExpression() {
+                this.expression = '';
+                this.expressionText.textContent = '';
+                this.errorMessage.textContent = '';
+                this.steps = [];
+                this.stepInfo.style.display = 'none';
+                this.initialRender();
+                this.updateNavigation();
             }
 
             initialRender() {
                 this.renderer.render([], {
-                    color: this.color,
-                    pattern: this.pattern,
+                    color: '#6366f1',
+                    pattern: 'solid',
                     opacity: this.opacity,
                     showLabels: this.showLabels
                 });
             }
 
             visualize() {
-                const expression = this.expressionInput.value.trim();
+                const expression = this.expression.trim();
 
                 if (!expression) {
-                    this.errorMessage.textContent = 'Please enter an expression';
                     return;
                 }
 
@@ -1257,12 +1198,14 @@
                     const stepGenerator = new StepGenerator();
                     this.steps = stepGenerator.generateSteps(ast, expression);
 
-                    // Generate random patterns for each step
-                    this.stepPatterns = this.steps.map(() => 
+                    this.stepPatterns = this.steps.map(() =>
                         this.patternOptions[Math.floor(Math.random() * this.patternOptions.length)]
                     );
 
-                    // Start at the last step (final result)
+                    this.stepColors = this.steps.map(() =>
+                        this.colorPalette[Math.floor(Math.random() * this.colorPalette.length)]
+                    );
+
                     this.currentStep = this.steps.length - 1;
                     this.errorMessage.textContent = '';
 
@@ -1286,7 +1229,7 @@
                 }
 
                 const step = this.steps[this.currentStep];
-                const stepColor = this.colorPalette[this.currentStep % this.colorPalette.length];
+                const stepColor = (this.stepColors && this.stepColors[this.currentStep]) || this.colorPalette[this.currentStep % this.colorPalette.length];
                 const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
 
                 this.stepNumber.textContent = `Step ${this.currentStep + 1} of ${this.steps.length}`;
@@ -1304,7 +1247,7 @@
             updateRender() {
                 if (this.steps.length > 0 && this.currentStep < this.steps.length) {
                     const step = this.steps[this.currentStep];
-                    const stepColor = this.colorPalette[this.currentStep % this.colorPalette.length];
+                    const stepColor = (this.stepColors && this.stepColors[this.currentStep]) || this.colorPalette[this.currentStep % this.colorPalette.length];
                     const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
                     this.renderer.render(step.regions, {
                         color: stepColor,
@@ -1338,7 +1281,6 @@
 
             togglePlay() {
                 if (!this.isPlaying) {
-                    // Starting to play - reset to first step
                     this.isPlaying = true;
                     this.playBtn.textContent = '⏸ Pause';
                     this.currentStep = 0;
@@ -1353,7 +1295,6 @@
                         }
                     }, 2000);
                 } else {
-                    // Pausing
                     this.stopPlay();
                 }
             }
@@ -1369,10 +1310,7 @@
 
             reset() {
                 this.stopPlay();
-                this.currentStep = 0;
-                this.stepInfo.style.display = 'none';
-                this.initialRender();
-                this.updateNavigation();
+                this.clearExpression();
             }
 
             hidePanel() {
@@ -1385,6 +1323,61 @@
                 this.panelVisible = true;
                 this.controlPanel.classList.remove('hidden');
                 this.togglePanelBtn.classList.add('hidden');
+            }
+
+            bindEvents() {
+                // Symbol buttons
+                document.querySelectorAll('.sym-btn[data-insert]').forEach(btn => {
+                    btn.addEventListener('click', () => this.insertSymbol(btn.dataset.insert));
+                });
+                document.getElementById('backspace-btn').addEventListener('click', () => this.backspace());
+                document.getElementById('clear-btn').addEventListener('click', () => this.clearExpression());
+
+                // Navigation
+                this.prevBtn.addEventListener('click', () => this.prevStep());
+                this.nextBtn.addEventListener('click', () => this.nextStep());
+                this.playBtn.addEventListener('click', () => this.togglePlay());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.togglePanelBtn.addEventListener('click', () => this.showPanel());
+                this.hidePanelBtn.addEventListener('click', () => this.hidePanel());
+
+                this.opacitySlider.addEventListener('input', (e) => {
+                    this.opacity = e.target.value / 100;
+                    this.opacityValue.textContent = `${e.target.value}%`;
+                    this.updateRender();
+                });
+
+                this.showLabelsCheckbox.addEventListener('change', (e) => {
+                    this.showLabels = e.target.checked;
+                    this.updateRender();
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    // Backspace key
+                    if (e.key === 'Backspace') {
+                        e.preventDefault();
+                        this.backspace();
+                        return;
+                    }
+                    switch (e.key) {
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            this.prevStep();
+                            break;
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            this.nextStep();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            this.togglePlay();
+                            break;
+                        case 'r':
+                        case 'R':
+                            this.reset();
+                            break;
+                    }
+                });
             }
         }
 
