@@ -383,6 +383,35 @@
             50%       { opacity: 0; }
         }
 
+        @keyframes morphFadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes morphPulse {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes morphMerge {
+            0%   { opacity: 1; }
+            30%  { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        .morph-layer-enter {
+            animation: morphFadeIn 0.4s ease forwards;
+        }
+
+        .morph-layer-pulse {
+            animation: morphPulse 0.6s ease;
+        }
+
+        .morph-layer-exit {
+            animation: morphMerge 0.5s ease forwards;
+        }
+
         .symbol-buttons {
             display: flex;
             flex-direction: column;
@@ -728,6 +757,8 @@
                     
                     // Combine them
                     const regions = RegionMapper.getRegionsForAST(node);
+                    const leftRegions = RegionMapper.getRegionsForAST(node.left);
+                    const rightRegions = RegionMapper.getRegionsForAST(node.right);
                     const leftExpr = this.astToString(node.left);
                     const rightExpr = this.astToString(node.right);
                     
@@ -737,6 +768,9 @@
                         description: `Combine (${leftExpr}) ${node.type} (${rightExpr})`,
                         expression: `(${leftExpr}) ${node.type} (${rightExpr})`,
                         regions: regions,
+                        leftRegions: leftRegions,
+                        rightRegions: rightRegions,
+                        isCombineStep: true,
                         ast: node
                     });
                 }
@@ -791,6 +825,8 @@
                 this.calculateDimensions();
                 this.createDefinitions();
                 this.createRegionElements();
+                this.morphLayerA = null;
+                this.morphLayerB = null;
             }
 
             calculateDimensions() {
@@ -1069,6 +1105,65 @@
                 g.style.display = 'inline';
             }
 
+            // ---- Morph animation helpers ----
+
+            // Build a ghost layer group that renders a set of regions with a given color/opacity.
+            // Returns the <g> element (not yet attached).
+            _buildMorphGroup(shadedRegions, color, opacity) {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("pointer-events", "none");
+
+                shadedRegions.forEach(index => {
+                    // Clone the existing region element structure so we keep the clip/mask geometry
+                    const original = this.regionElements[index];
+                    if (!original) return;
+                    const clone = original.cloneNode(true);
+                    // Remove any existing display:none
+                    clone.style.display = 'inline';
+                    // Find the fill rect in the clone and set its color
+                    let rect = clone;
+                    while (rect && !rect.classList?.contains("region-fill-rect")) {
+                        rect = rect.firstElementChild;
+                    }
+                    if (rect) {
+                        rect.setAttribute("fill", color);
+                        rect.setAttribute("fill-opacity", opacity);
+                    }
+                    g.appendChild(clone);
+                });
+
+                return g;
+            }
+
+            // Show two region sets simultaneously with different colors (for the morph animation)
+            // Returns the two layer group elements so the caller can animate them.
+            renderDual(leftRegions, rightRegions, leftColor, rightColor, opacity) {
+                // Remove any previous morph layers
+                this.clearMorphLayer();
+
+                this.morphLayerA = this._buildMorphGroup(leftRegions, leftColor, opacity);
+                this.morphLayerB = this._buildMorphGroup(rightRegions, rightColor, opacity);
+
+                // Insert morph layers above regionsLayer but below boundariesG / labelsLayer
+                // They go right after regionsLayer
+                this.regionsLayer.after(this.morphLayerA);
+                this.morphLayerA.after(this.morphLayerB);
+
+                return { layerA: this.morphLayerA, layerB: this.morphLayerB };
+            }
+
+            // Remove morph overlay layers from the SVG
+            clearMorphLayer() {
+                if (this.morphLayerA && this.morphLayerA.parentNode) {
+                    this.morphLayerA.parentNode.removeChild(this.morphLayerA);
+                }
+                if (this.morphLayerB && this.morphLayerB.parentNode) {
+                    this.morphLayerB.parentNode.removeChild(this.morphLayerB);
+                }
+                this.morphLayerA = null;
+                this.morphLayerB = null;
+            }
+
             drawSetLabels() {
                 const fontSize = Math.max(12, this.width * 0.028);
                 const offset = this.circleRadius * 0.75;
@@ -1131,6 +1226,8 @@
                 this.opacity = 0.6;
                 this.showLabels = true;
                 this.stepPatterns = [];
+                this._morphTimeouts = [];
+                this._morphAnimating = false;
 
                 this.bindEvents();
                 this.initialRender();
@@ -1219,7 +1316,7 @@
                 }
             }
 
-            updateStepDisplay() {
+            updateStepDisplay(animate = false) {
                 if (this.currentStep >= this.steps.length) {
                     this.currentStep = this.steps.length - 1;
                 }
@@ -1236,12 +1333,19 @@
                 this.stepType.textContent = step.type;
                 this.stepDescription.textContent = step.description;
 
-                this.renderer.render(step.regions, {
-                    color: stepColor,
-                    pattern: stepPattern,
-                    opacity: this.opacity,
-                    showLabels: this.showLabels
-                });
+                // Run morph animation for combine steps when navigating forward
+                if (animate && step.isCombineStep && step.leftRegions && step.rightRegions) {
+                    this.animateCombine(step, this.currentStep);
+                } else {
+                    // Cancel any running morph before rendering normally
+                    this._cancelMorphAnimation();
+                    this.renderer.render(step.regions, {
+                        color: stepColor,
+                        pattern: stepPattern,
+                        opacity: this.opacity,
+                        showLabels: this.showLabels
+                    });
+                }
             }
 
             updateRender() {
@@ -1258,6 +1362,87 @@
                 }
             }
 
+            // Cancel any in-progress morph animation
+            _cancelMorphAnimation() {
+                if (this._morphTimeouts) {
+                    this._morphTimeouts.forEach(id => clearTimeout(id));
+                }
+                this._morphTimeouts = [];
+                this._morphAnimating = false;
+                this.renderer.clearMorphLayer();
+            }
+
+            // Run the 3-phase morph animation for a combine step.
+            // Phase 1 (0ms):    Show left operand regions in its color (base render = invisible, morph layers on top)
+            // Phase 2 (700ms):  Fade in right operand regions in its color alongside left
+            // Phase 3 (1500ms): Flash/merge both layers away and snap to the final combined render
+            animateCombine(step, stepIndex) {
+                this._cancelMorphAnimation();
+                this._morphAnimating = true;
+                this._morphTimeouts = [];
+
+                const leftColor  = this._pickColor(stepIndex - 2); // color used 2 steps ago (left operand's last step)
+                const rightColor = this._pickColor(stepIndex - 1); // color used 1 step ago (right operand's last step)
+                const finalColor = this._pickColor(stepIndex);
+                const finalPattern = this.stepPatterns[stepIndex] || 'solid';
+                const opacity = this.opacity;
+
+                // Phase 1: Render the base SVG as blank (no shaded regions), overlay left morph layer
+                this.renderer.render([], { color: finalColor, pattern: 'solid', opacity, showLabels: this.showLabels });
+                const { layerA, layerB } = this.renderer.renderDual(
+                    step.leftRegions, step.rightRegions,
+                    leftColor, rightColor, opacity
+                );
+
+                // Start layerA visible, layerB hidden (will fade in)
+                layerA.style.opacity = '1';
+                layerB.style.opacity = '0';
+                layerA.classList.add('morph-layer-enter');
+
+                // Phase 2 (700ms): fade in layerB alongside layerA
+                const t1 = setTimeout(() => {
+                    layerB.style.transition = 'opacity 0.4s ease';
+                    layerB.style.opacity = '1';
+                }, 700);
+                this._morphTimeouts.push(t1);
+
+                // Phase 2b (1300ms): pulse both layers to signal merging
+                const t2 = setTimeout(() => {
+                    layerA.classList.add('morph-layer-pulse');
+                    layerB.classList.add('morph-layer-pulse');
+                }, 1300);
+                this._morphTimeouts.push(t2);
+
+                // Phase 3 (1800ms): dissolve morph layers away, reveal combined final render
+                const t3 = setTimeout(() => {
+                    layerA.classList.add('morph-layer-exit');
+                    layerB.classList.add('morph-layer-exit');
+
+                    // Snap in the final combined render underneath (visible when layers finish exiting)
+                    this.renderer.render(step.regions, {
+                        color: finalColor,
+                        pattern: finalPattern,
+                        opacity,
+                        showLabels: this.showLabels
+                    });
+                }, 1800);
+                this._morphTimeouts.push(t3);
+
+                // Phase 3 cleanup (2350ms): remove morph layers completely
+                const t4 = setTimeout(() => {
+                    this.renderer.clearMorphLayer();
+                    this._morphAnimating = false;
+                }, 2350);
+                this._morphTimeouts.push(t4);
+            }
+
+            _pickColor(stepIndex) {
+                if (this.stepColors && this.stepColors[stepIndex] !== undefined) {
+                    return this.stepColors[stepIndex];
+                }
+                return this.colorPalette[((stepIndex % this.colorPalette.length) + this.colorPalette.length) % this.colorPalette.length];
+            }
+
             updateNavigation() {
                 this.prevBtn.disabled = this.currentStep === 0;
                 this.nextBtn.disabled = this.currentStep >= this.steps.length - 1;
@@ -1266,7 +1451,7 @@
             prevStep() {
                 if (this.currentStep > 0) {
                     this.currentStep--;
-                    this.updateStepDisplay();
+                    this.updateStepDisplay(false); // no animation when going backwards
                     this.updateNavigation();
                 }
             }
@@ -1274,7 +1459,7 @@
             nextStep() {
                 if (this.currentStep < this.steps.length - 1) {
                     this.currentStep++;
-                    this.updateStepDisplay();
+                    this.updateStepDisplay(true); // animate combine steps on forward navigation
                     this.updateNavigation();
                 }
             }
@@ -1284,16 +1469,28 @@
                     this.isPlaying = true;
                     this.playBtn.textContent = '⏸ Pause';
                     this.currentStep = 0;
-                    this.updateStepDisplay();
+                    this.updateStepDisplay(true);
                     this.updateNavigation();
-                    
-                    this.playInterval = setInterval(() => {
-                        if (this.currentStep < this.steps.length - 1) {
-                            this.nextStep();
-                        } else {
-                            this.stopPlay();
-                        }
-                    }, 2000);
+
+                    const scheduleNext = () => {
+                        if (!this.isPlaying) return;
+                        // If a morph animation is running, wait for it to finish before advancing
+                        const step = this.steps[this.currentStep];
+                        const delay = (step && step.isCombineStep) ? 2600 : 2000;
+                        this.playInterval = setTimeout(() => {
+                            if (!this.isPlaying) return;
+                            if (this.currentStep < this.steps.length - 1) {
+                                this.currentStep++;
+                                this.updateStepDisplay(true);
+                                this.updateNavigation();
+                                scheduleNext();
+                            } else {
+                                this.stopPlay();
+                            }
+                        }, delay);
+                    };
+
+                    scheduleNext();
                 } else {
                     this.stopPlay();
                 }
@@ -1303,9 +1500,10 @@
                 this.isPlaying = false;
                 this.playBtn.textContent = '▶ Play';
                 if (this.playInterval) {
-                    clearInterval(this.playInterval);
+                    clearTimeout(this.playInterval);
                     this.playInterval = null;
                 }
+                this._cancelMorphAnimation();
             }
 
             reset() {
