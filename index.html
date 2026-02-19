@@ -16,7 +16,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
+            background: #0f1117;
             min-height: 100vh;
             width: 100vw;
             height: 100vh;
@@ -31,9 +31,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: white;
+            background: #1a1d2e;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
             min-width: 0;
             min-height: 0;
             overflow: hidden;
@@ -49,8 +49,8 @@
 
         #control-panel {
             width: 300px;
-            background: white;
-            box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+            background: #1e2235;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.4);
             padding: 20px;
             z-index: 100;
             overflow-y: auto;
@@ -76,22 +76,22 @@
             right: 20px;
             width: 44px;
             height: 44px;
-            background: white;
+            background: #252b42;
             border: none;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
             cursor: pointer;
             z-index: 101;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            color: #333;
+            color: #b8bfd4;
             transition: background 0.2s, transform 0.2s;
         }
 
         #toggle-panel-btn:hover {
-            background: #f8fafc;
+            background: #2a3150;
             transform: scale(1.05);
         }
 
@@ -109,7 +109,7 @@
 
             #control-panel {
                 width: 100%;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
                 order: -1;
             }
 
@@ -123,7 +123,7 @@
         #control-panel h2 {
             font-size: 16px;
             margin-bottom: 15px;
-            color: #333;
+            color: #b8bfd4;
             font-weight: 600;
         }
 
@@ -134,7 +134,7 @@
         .input-group label {
             display: block;
             font-size: 12px;
-            color: #666;
+            color: #8890aa;
             margin-bottom: 5px;
             font-weight: 500;
         }
@@ -142,7 +142,7 @@
         #expression-input {
             width: 100%;
             padding: 10px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #2a3150;
             border-radius: 6px;
             font-size: 14px;
             font-family: 'JetBrains Mono', monospace;
@@ -151,18 +151,18 @@
 
         #expression-input:focus {
             outline: none;
-            border-color: #6366f1;
+            border-color: #7b88c9;
         }
 
         #error-message {
-            color: #ef4444;
+            color: #c47e7e;
             font-size: 12px;
             margin-top: 5px;
             min-height: 16px;
         }
 
         .step-info {
-            background: #f8fafc;
+            background: #252b42;
             border-radius: 6px;
             padding: 12px;
             margin-bottom: 15px;
@@ -177,22 +177,22 @@
 
         .step-number {
             font-size: 12px;
-            color: #6366f1;
+            color: #7b88c9;
             font-weight: 600;
         }
 
         .step-type {
             font-size: 11px;
             padding: 3px 8px;
-            background: #e0e7ff;
-            color: #4338ca;
+            background: #2e3570;
+            color: #9aa5d4;
             border-radius: 4px;
             font-weight: 500;
         }
 
         .step-description {
             font-size: 13px;
-            color: #475569;
+            color: #98a0bc;
             line-height: 1.4;
         }
 
@@ -205,8 +205,9 @@
         .nav-btn {
             flex: 1;
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
-            background: white;
+            border: 1px solid #2a3150;
+            background: #252b42;
+            color: #b8bfd4;
             border-radius: 6px;
             font-size: 13px;
             cursor: pointer;
@@ -218,12 +219,12 @@
         }
 
         .nav-btn:hover:not(:disabled) {
-            background: #f8fafc;
-            border-color: #cbd5e1;
+            background: #2a3150;
+            border-color: #3a4468;
         }
 
         .nav-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
@@ -241,16 +242,17 @@
         select {
             width: 100%;
             padding: 8px 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #2a3150;
             border-radius: 6px;
             font-size: 13px;
-            background: white;
+            background: #252b42;
+            color: #b8bfd4;
             cursor: pointer;
         }
 
         select:focus {
             outline: none;
-            border-color: #6366f1;
+            border-color: #7b88c9;
         }
 
         .slider-container {
@@ -266,12 +268,12 @@
 
         .slider-header label {
             font-size: 12px;
-            color: #666;
+            color: #8890aa;
         }
 
         .slider-value {
             font-size: 12px;
-            color: #333;
+            color: #b8bfd4;
             font-weight: 500;
         }
 
@@ -279,7 +281,7 @@
             width: 100%;
             height: 6px;
             border-radius: 3px;
-            background: #e2e8f0;
+            background: #2a3150;
             appearance: none;
             cursor: pointer;
         }
@@ -289,7 +291,7 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #6366f1;
+            background: #7b88c9;
             cursor: pointer;
             transition: transform 0.1s;
         }
@@ -299,14 +301,14 @@
         }
 
         .shortcuts {
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #2a3150;
             padding-top: 15px;
             margin-top: 15px;
         }
 
         .shortcuts-title {
             font-size: 11px;
-            color: #94a3b8;
+            color: #6b7494;
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -316,12 +318,12 @@
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            color: #64748b;
+            color: #8890aa;
             margin-bottom: 4px;
         }
 
         .shortcut kbd {
-            background: #f1f5f9;
+            background: #252b42;
             padding: 2px 6px;
             border-radius: 4px;
             font-family: inherit;
@@ -343,19 +345,19 @@
 
         #region-labels-toggle label {
             font-size: 13px;
-            color: #475569;
+            color: #8890aa;
             cursor: pointer;
         }
 
         #expression-display {
             min-height: 42px;
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #2a3150;
             border-radius: 6px;
             font-size: 18px;
             font-family: 'JetBrains Mono', monospace;
-            background: #f8fafc;
-            color: #1e293b;
+            background: #252b42;
+            color: #d0d5e8;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
@@ -366,13 +368,13 @@
 
         #expression-display:focus-within,
         #expression-display.active {
-            border-color: #6366f1;
-            background: #fff;
+            border-color: #7b88c9;
+            background: #2a3150;
         }
 
         #expression-display .cursor {
             display: inline-block;
-            color: #6366f1;
+            color: #7b88c9;
             font-weight: 300;
             animation: blink 1s step-end infinite;
             margin-left: 1px;
@@ -400,16 +402,22 @@
             100% { opacity: 0; }
         }
 
+        :root {
+            --morph-enter-dur: 0.4s;
+            --morph-pulse-dur: 0.6s;
+            --morph-exit-dur:  0.5s;
+        }
+
         .morph-layer-enter {
-            animation: morphFadeIn 0.4s ease forwards;
+            animation: morphFadeIn var(--morph-enter-dur) ease forwards;
         }
 
         .morph-layer-pulse {
-            animation: morphPulse 0.6s ease;
+            animation: morphPulse var(--morph-pulse-dur) ease;
         }
 
         .morph-layer-exit {
-            animation: morphMerge 0.5s ease forwards;
+            animation: morphMerge var(--morph-exit-dur) ease forwards;
         }
 
         .symbol-buttons {
@@ -429,52 +437,52 @@
             padding: 10px 4px;
             font-size: 16px;
             font-family: 'JetBrains Mono', monospace;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #2a3150;
             border-radius: 6px;
-            background: white;
-            color: #1e293b;
+            background: #252b42;
+            color: #d0d5e8;
             cursor: pointer;
             transition: background 0.15s, border-color 0.15s, transform 0.1s;
             user-select: none;
         }
 
         .sym-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
+            background: #2a3150;
+            border-color: #3a4468;
         }
 
         .sym-btn:active {
             transform: scale(0.93);
-            background: #e0e7ff;
-            border-color: #6366f1;
+            background: #2e3570;
+            border-color: #7b88c9;
         }
 
         .var-btn {
             font-weight: 600;
-            color: #4338ca;
-            border-color: #c7d2fe;
-            background: #eef2ff;
+            color: #9aa5d4;
+            border-color: #3b4470;
+            background: #252d55;
         }
 
         .var-btn:hover {
-            background: #e0e7ff;
-            border-color: #a5b4fc;
+            background: #2e3570;
+            border-color: #4d5a8a;
         }
 
         .action-btn {
             font-size: 13px;
-            color: #64748b;
+            color: #8890aa;
         }
 
         #clear-btn {
-            color: #ef4444;
-            border-color: #fecaca;
-            background: #fff5f5;
+            color: #c47e7e;
+            border-color: #6b3535;
+            background: #2d1f1f;
         }
 
         #clear-btn:hover {
-            background: #fee2e2;
-            border-color: #fca5a5;
+            background: #3d2525;
+            border-color: #8a4a4a;
         }
     </style>
 </head>
@@ -531,9 +539,17 @@
             <div class="slider-container">
                 <div class="slider-header">
                     <label>Opacity</label>
-                    <span class="slider-value" id="opacity-value">60%</span>
+                    <span class="slider-value" id="opacity-value">38%</span>
                 </div>
-                <input type="range" id="opacity-slider" min="10" max="100" value="60">
+                <input type="range" id="opacity-slider" min="10" max="100" value="38">
+            </div>
+
+            <div class="slider-container">
+                <div class="slider-header">
+                    <label>Anim Speed</label>
+                    <span class="slider-value" id="speed-value">1×</span>
+                </div>
+                <input type="range" id="speed-slider" min="25" max="300" value="100" step="25">
             </div>
 
             <div id="region-labels-toggle">
@@ -550,7 +566,7 @@
                 <div class="shortcut"><span>Backspace</span><kbd>⌫</kbd></div>
             </div>
 
-            <button id="hide-panel-btn" style="margin-top: 15px; padding: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; width: 100%;">Hide Panel</button>
+            <button id="hide-panel-btn" style="margin-top: 15px; padding: 10px; background: #252b42; border: 1px solid #2a3150; border-radius: 6px; cursor: pointer; width: 100%; color: #8890aa; font-family: 'JetBrains Mono', monospace; font-size: 13px;">Hide Panel</button>
         </div>
 
     <button id="toggle-panel-btn" class="hidden">☰</button>
@@ -750,18 +766,19 @@
                 }
 
                 if (node.type === 'AND' || node.type === 'OR') {
-                    // Break down left side
+                    // Break down left side; snapshot its last step index before moving on
                     this.breakDownExpression(node.left);
-                    // Break down right side
+                    const leftStepIndex = this.steps.length - 1;
+                    // Break down right side; snapshot its last step index
                     this.breakDownExpression(node.right);
-                    
-                    // Combine them
+                    const rightStepIndex = this.steps.length - 1;
+
                     const regions = RegionMapper.getRegionsForAST(node);
                     const leftRegions = RegionMapper.getRegionsForAST(node.left);
                     const rightRegions = RegionMapper.getRegionsForAST(node.right);
                     const leftExpr = this.astToString(node.left);
                     const rightExpr = this.astToString(node.right);
-                    
+
                     this.steps.push({
                         stepNumber: this.steps.length + 1,
                         type: node.type === 'AND' ? 'Intersection' : 'Union',
@@ -770,6 +787,8 @@
                         regions: regions,
                         leftRegions: leftRegions,
                         rightRegions: rightRegions,
+                        leftStepIndex: leftStepIndex,
+                        rightStepIndex: rightStepIndex,
                         isCombineStep: true,
                         ast: node
                     });
@@ -900,14 +919,14 @@
                 sampleRect.setAttribute("width", this.sampleRect.width);
                 sampleRect.setAttribute("height", this.sampleRect.height);
                 sampleRect.setAttribute("fill", "none");
-                sampleRect.setAttribute("stroke", "#1e293b");
+                sampleRect.setAttribute("stroke", "#3a4468");
                 sampleRect.setAttribute("stroke-width", "2");
                 sampleG.appendChild(sampleRect);
 
                 const sampleText = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 sampleText.setAttribute("x", this.sampleRect.x + 12);
                 sampleText.setAttribute("y", this.sampleRect.y + 20);
-                sampleText.setAttribute("fill", "#64748b");
+                sampleText.setAttribute("fill", "#6b7494");
                 sampleText.textContent = "S";
                 sampleText.style.font = "italic 14px serif";
                 sampleG.appendChild(sampleText);
@@ -933,7 +952,7 @@
                     circle.setAttribute("cy", this.circleCenters[key].y);
                     circle.setAttribute("r", this.circleRadius);
                     circle.setAttribute("fill", "none");
-                    circle.setAttribute("stroke", "#1e293b");
+                    circle.setAttribute("stroke", "#3a4468");
                     circle.setAttribute("stroke-width", "2");
                     boundariesG.appendChild(circle);
                 });
@@ -1014,46 +1033,45 @@
                 // Not needed for SVG
             }
 
+            // Ensure a color-baked SVG pattern exists in <defs> and return its fill reference.
+            _ensurePattern(pattern, color) {
+                if (pattern === 'solid') return color;
+                const safeColor = color.replace('#', '');
+                const patternId = `pattern-${pattern}-${safeColor}`;
+                if (!this.svg.querySelector(`#${patternId}`)) {
+                    const tmpl = this.patternTemplates[pattern];
+                    if (tmpl) {
+                        const p = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+                        p.setAttribute("id", patternId);
+                        p.setAttribute("patternUnits", "userSpaceOnUse");
+                        p.setAttribute("width", tmpl.w);
+                        p.setAttribute("height", tmpl.h);
+                        p.innerHTML = tmpl.content(color);
+                        this.svg.querySelector("defs").appendChild(p);
+                    }
+                }
+                return `url(#${patternId})`;
+            }
+
             render(shadedRegions, options = {}) {
-                const { color = '#6366f1', pattern = 'solid', opacity = 0.6, showLabels = true } = options;
+                const { color = '#7b88c9', pattern = 'solid', opacity = 0.38, showLabels = true } = options;
 
                 Object.values(this.regionElements).forEach(el => el.style.display = 'none');
 
-                // For non-solid patterns, ensure a color-baked pattern clone exists in defs
-                let patternFillRef = color;
-                if (pattern !== 'solid') {
-                    const safeColor = color.replace('#', '');
-                    const patternId = `pattern-${pattern}-${safeColor}`;
-                    if (!this.svg.querySelector(`#${patternId}`)) {
-                        const tmpl = this.patternTemplates[pattern];
-                        if (tmpl) {
-                            const p = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
-                            p.setAttribute("id", patternId);
-                            p.setAttribute("patternUnits", "userSpaceOnUse");
-                            p.setAttribute("width", tmpl.w);
-                            p.setAttribute("height", tmpl.h);
-                            p.innerHTML = tmpl.content(color);
-                            this.svg.querySelector("defs").appendChild(p);
-                        }
-                    }
-                    patternFillRef = `url(#pattern-${pattern}-${safeColor})`;
-                }
+                const fillRef = this._ensurePattern(pattern, color);
 
                 shadedRegions.forEach(index => {
                     const el = this.regionElements[index];
-                    if (el) {
-                        el.style.display = 'inline';
+                    if (!el) return;
+                    el.style.display = 'inline';
 
-                        // Find the rect to update style
-                        let rect = el;
-                        while (rect && !rect.classList?.contains("region-fill-rect")) {
-                            rect = rect.firstElementChild;
-                        }
-
-                        if (rect) {
-                            rect.setAttribute("fill", patternFillRef);
-                            rect.setAttribute("fill-opacity", opacity);
-                        }
+                    let rect = el;
+                    while (rect && !rect.classList?.contains("region-fill-rect")) {
+                        rect = rect.firstElementChild;
+                    }
+                    if (rect) {
+                        rect.setAttribute("fill", fillRef);
+                        rect.setAttribute("fill-opacity", opacity);
                     }
                 });
 
@@ -1096,7 +1114,7 @@
                         text.setAttribute("x", pos.x);
                         text.setAttribute("y", pos.y);
                         text.setAttribute("text-anchor", "middle");
-                        text.setAttribute("fill", "#475569");
+                        text.setAttribute("fill", "#6b7494");
                         text.style.font = `${fontSize}px sans-serif`;
                         text.textContent = labels[region];
                         g.appendChild(text);
@@ -1107,26 +1125,57 @@
 
             // ---- Morph animation helpers ----
 
-            // Build a ghost layer group that renders a set of regions with a given color/opacity.
-            // Returns the <g> element (not yet attached).
-            _buildMorphGroup(shadedRegions, color, opacity) {
+            // Render multiple region groups each with their own color/pattern in a single pass.
+            // Later groups overwrite earlier ones for any shared regions.
+            renderMulti(groups, options = {}) {
+                const { opacity = 0.38, showLabels = true } = options;
+
+                Object.values(this.regionElements).forEach(el => el.style.display = 'none');
+
+                groups.forEach(({ regions, color, pattern }) => {
+                    const fillRef = this._ensurePattern(pattern || 'solid', color || '#7b88c9');
+                    regions.forEach(index => {
+                        const el = this.regionElements[index];
+                        if (!el) return;
+                        el.style.display = 'inline';
+                        let rect = el;
+                        while (rect && !rect.classList?.contains("region-fill-rect")) {
+                            rect = rect.firstElementChild;
+                        }
+                        if (rect) {
+                            rect.setAttribute("fill", fillRef);
+                            rect.setAttribute("fill-opacity", opacity);
+                        }
+                    });
+                });
+
+                const labelsGroup = this.svg.querySelector("#region-labels-group");
+                if (labelsGroup) {
+                    labelsGroup.style.display = showLabels ? 'inline' : 'none';
+                } else if (showLabels) {
+                    this.drawLabels();
+                }
+            }
+
+            // Build a ghost layer group with a given color/pattern. Returns the <g> (not attached).
+            _buildMorphGroup(shadedRegions, color, pattern, opacity) {
                 const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 g.setAttribute("pointer-events", "none");
 
+                const fillRef = this._ensurePattern(pattern || 'solid', color);
+
                 shadedRegions.forEach(index => {
-                    // Clone the existing region element structure so we keep the clip/mask geometry
                     const original = this.regionElements[index];
                     if (!original) return;
                     const clone = original.cloneNode(true);
-                    // Remove any existing display:none
                     clone.style.display = 'inline';
-                    // Find the fill rect in the clone and set its color
+
                     let rect = clone;
                     while (rect && !rect.classList?.contains("region-fill-rect")) {
                         rect = rect.firstElementChild;
                     }
                     if (rect) {
-                        rect.setAttribute("fill", color);
+                        rect.setAttribute("fill", fillRef);
                         rect.setAttribute("fill-opacity", opacity);
                     }
                     g.appendChild(clone);
@@ -1135,14 +1184,14 @@
                 return g;
             }
 
-            // Show two region sets simultaneously with different colors (for the morph animation)
+            // Show two region sets simultaneously with distinct colors/patterns (for the morph animation).
             // Returns the two layer group elements so the caller can animate them.
-            renderDual(leftRegions, rightRegions, leftColor, rightColor, opacity) {
+            renderDual(leftRegions, rightRegions, leftColor, leftPattern, rightColor, rightPattern, opacity) {
                 // Remove any previous morph layers
                 this.clearMorphLayer();
 
-                this.morphLayerA = this._buildMorphGroup(leftRegions, leftColor, opacity);
-                this.morphLayerB = this._buildMorphGroup(rightRegions, rightColor, opacity);
+                this.morphLayerA = this._buildMorphGroup(leftRegions,  leftColor,  leftPattern,  opacity);
+                this.morphLayerB = this._buildMorphGroup(rightRegions, rightColor, rightPattern, opacity);
 
                 // Insert morph layers above regionsLayer but below boundariesG / labelsLayer
                 // They go right after regionsLayer
@@ -1173,7 +1222,7 @@
                     t.setAttribute("x", x);
                     t.setAttribute("y", y);
                     t.setAttribute("text-anchor", "middle");
-                    t.setAttribute("fill", "#1e293b");
+                    t.setAttribute("fill", "#b8bfd4");
                     t.style.font = `bold ${fontSize}px sans-serif`;
                     t.textContent = text;
                     this.labelsLayer.appendChild(t);
@@ -1202,6 +1251,8 @@
                 this.resetBtn = document.getElementById('reset-btn');
                 this.opacitySlider = document.getElementById('opacity-slider');
                 this.opacityValue = document.getElementById('opacity-value');
+                this.speedSlider = document.getElementById('speed-slider');
+                this.speedValue = document.getElementById('speed-value');
                 this.showLabelsCheckbox = document.getElementById('show-labels');
                 this.controlPanel = document.getElementById('control-panel');
                 this.togglePanelBtn = document.getElementById('toggle-panel-btn');
@@ -1217,14 +1268,16 @@
                 this.panelVisible = true;
 
                 this.colorPalette = [
-                    '#6366f1', '#ef4444', '#22c55e', '#f59e0b',
-                    '#8b5cf6', '#ec4899', '#14b8a6', '#64748b'
+                    '#7b88c9', '#c47e7e', '#7db87d', '#c4a97e',
+                    '#a07bc9', '#c47ea8', '#7bbab4', '#8896b5'
                 ];
 
                 this.patternOptions = ['solid', 'diagonal', 'crosshatch', 'dots', 'waves', 'grid'];
 
-                this.opacity = 0.6;
+                this.opacity = 0.38;
+                this.animSpeed = 1.0;
                 this.showLabels = true;
+                this.stepColors   = [];
                 this.stepPatterns = [];
                 this._morphTimeouts = [];
                 this._morphAnimating = false;
@@ -1270,12 +1323,7 @@
             }
 
             initialRender() {
-                this.renderer.render([], {
-                    color: '#6366f1',
-                    pattern: 'solid',
-                    opacity: this.opacity,
-                    showLabels: this.showLabels
-                });
+                this.renderer.render([], { opacity: this.opacity, showLabels: this.showLabels });
             }
 
             visualize() {
@@ -1295,13 +1343,11 @@
                     const stepGenerator = new StepGenerator();
                     this.steps = stepGenerator.generateSteps(ast, expression);
 
-                    this.stepPatterns = this.steps.map(() =>
-                        this.patternOptions[Math.floor(Math.random() * this.patternOptions.length)]
-                    );
-
-                    this.stepColors = this.steps.map(() =>
-                        this.colorPalette[Math.floor(Math.random() * this.colorPalette.length)]
-                    );
+                    // Assign a unique (color, pattern) to each step for this expression.
+                    const shuffledColors   = this._shuffle([...this.colorPalette]);
+                    const shuffledPatterns = this._shuffle([...this.patternOptions]);
+                    this.stepColors   = this.steps.map((_, i) => shuffledColors[i % shuffledColors.length]);
+                    this.stepPatterns = this.steps.map((_, i) => shuffledPatterns[i % shuffledPatterns.length]);
 
                     this.currentStep = this.steps.length - 1;
                     this.errorMessage.textContent = '';
@@ -1325,8 +1371,8 @@
                     this.currentStep = 0;
                 }
 
-                const step = this.steps[this.currentStep];
-                const stepColor = (this.stepColors && this.stepColors[this.currentStep]) || this.colorPalette[this.currentStep % this.colorPalette.length];
+                const step        = this.steps[this.currentStep];
+                const stepColor   = this.stepColors[this.currentStep]   || this.colorPalette[0];
                 const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
 
                 this.stepNumber.textContent = `Step ${this.currentStep + 1} of ${this.steps.length}`;
@@ -1337,28 +1383,49 @@
                 if (animate && step.isCombineStep && step.leftRegions && step.rightRegions) {
                     this.animateCombine(step, this.currentStep);
                 } else {
-                    // Cancel any running morph before rendering normally
                     this._cancelMorphAnimation();
-                    this.renderer.render(step.regions, {
-                        color: stepColor,
-                        pattern: stepPattern,
-                        opacity: this.opacity,
-                        showLabels: this.showLabels
-                    });
+                    if (step.isCombineStep) {
+                        const leftColor   = this.stepColors[step.leftStepIndex]   || this.colorPalette[0];
+                        const leftPattern = this.stepPatterns[step.leftStepIndex] || 'solid';
+                        const rightColor   = this.stepColors[step.rightStepIndex]   || this.colorPalette[1];
+                        const rightPattern = this.stepPatterns[step.rightStepIndex] || 'solid';
+                        const leftResult  = step.leftRegions.filter(r => step.regions.includes(r));
+                        const rightResult = step.rightRegions.filter(r => step.regions.includes(r));
+                        this.renderer.renderMulti([
+                            { regions: leftResult,  color: leftColor,  pattern: leftPattern },
+                            { regions: rightResult, color: rightColor, pattern: rightPattern }
+                        ], { opacity: this.opacity, showLabels: this.showLabels });
+                    } else {
+                        this.renderer.render(step.regions, {
+                            color: stepColor, pattern: stepPattern,
+                            opacity: this.opacity, showLabels: this.showLabels
+                        });
+                    }
                 }
             }
 
             updateRender() {
                 if (this.steps.length > 0 && this.currentStep < this.steps.length) {
                     const step = this.steps[this.currentStep];
-                    const stepColor = (this.stepColors && this.stepColors[this.currentStep]) || this.colorPalette[this.currentStep % this.colorPalette.length];
-                    const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
-                    this.renderer.render(step.regions, {
-                        color: stepColor,
-                        pattern: stepPattern,
-                        opacity: this.opacity,
-                        showLabels: this.showLabels
-                    });
+                    if (step.isCombineStep) {
+                        const leftColor   = this.stepColors[step.leftStepIndex]   || this.colorPalette[0];
+                        const leftPattern = this.stepPatterns[step.leftStepIndex] || 'solid';
+                        const rightColor   = this.stepColors[step.rightStepIndex]   || this.colorPalette[1];
+                        const rightPattern = this.stepPatterns[step.rightStepIndex] || 'solid';
+                        const leftResult  = step.leftRegions.filter(r => step.regions.includes(r));
+                        const rightResult = step.rightRegions.filter(r => step.regions.includes(r));
+                        this.renderer.renderMulti([
+                            { regions: leftResult,  color: leftColor,  pattern: leftPattern },
+                            { regions: rightResult, color: rightColor, pattern: rightPattern }
+                        ], { opacity: this.opacity, showLabels: this.showLabels });
+                    } else {
+                        const stepColor   = this.stepColors[this.currentStep]   || this.colorPalette[0];
+                        const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
+                        this.renderer.render(step.regions, {
+                            color: stepColor, pattern: stepPattern,
+                            opacity: this.opacity, showLabels: this.showLabels
+                        });
+                    }
                 }
             }
 
@@ -1373,25 +1440,25 @@
             }
 
             // Run the 3-phase morph animation for a combine step.
-            // Phase 1 (0ms):    Show left operand regions in its color (base render = invisible, morph layers on top)
-            // Phase 2 (700ms):  Fade in right operand regions in its color alongside left
-            // Phase 3 (1500ms): Flash/merge both layers away and snap to the final combined render
+            // Phase 1 (0ms):    Show left operand regions in left step's color, overlay on blank base
+            // Phase 2 (700ms):  Fade in right operand regions in right step's color alongside left
+            // Phase 3 (1800ms): Dissolve both layers away, snap to the final combined render
             animateCombine(step, stepIndex) {
                 this._cancelMorphAnimation();
                 this._morphAnimating = true;
                 this._morphTimeouts = [];
 
-                const leftColor  = this._pickColor(stepIndex - 2); // color used 2 steps ago (left operand's last step)
-                const rightColor = this._pickColor(stepIndex - 1); // color used 1 step ago (right operand's last step)
-                const finalColor = this._pickColor(stepIndex);
-                const finalPattern = this.stepPatterns[stepIndex] || 'solid';
+                const leftColor   = this.stepColors[step.leftStepIndex]   || this.colorPalette[0];
+                const leftPattern = this.stepPatterns[step.leftStepIndex] || 'solid';
+                const rightColor   = this.stepColors[step.rightStepIndex]   || this.colorPalette[1];
+                const rightPattern = this.stepPatterns[step.rightStepIndex] || 'solid';
                 const opacity = this.opacity;
 
-                // Phase 1: Render the base SVG as blank (no shaded regions), overlay left morph layer
-                this.renderer.render([], { color: finalColor, pattern: 'solid', opacity, showLabels: this.showLabels });
+                // Phase 1: blank base, overlay both full operand layers in their source colors/patterns
+                this.renderer.render([], { opacity, showLabels: this.showLabels });
                 const { layerA, layerB } = this.renderer.renderDual(
                     step.leftRegions, step.rightRegions,
-                    leftColor, rightColor, opacity
+                    leftColor, leftPattern, rightColor, rightPattern, opacity
                 );
 
                 // Start layerA visible, layerB hidden (will fade in)
@@ -1399,18 +1466,20 @@
                 layerB.style.opacity = '0';
                 layerA.classList.add('morph-layer-enter');
 
+                const s = 1 / this.animSpeed; // scale factor: lower speed → larger s → longer delays
+
                 // Phase 2 (700ms): fade in layerB alongside layerA
                 const t1 = setTimeout(() => {
-                    layerB.style.transition = 'opacity 0.4s ease';
+                    layerB.style.transition = `opacity ${0.4 * s}s ease`;
                     layerB.style.opacity = '1';
-                }, 700);
+                }, 700 * s);
                 this._morphTimeouts.push(t1);
 
                 // Phase 2b (1300ms): pulse both layers to signal merging
                 const t2 = setTimeout(() => {
                     layerA.classList.add('morph-layer-pulse');
                     layerB.classList.add('morph-layer-pulse');
-                }, 1300);
+                }, 1300 * s);
                 this._morphTimeouts.push(t2);
 
                 // Phase 3 (1800ms): dissolve morph layers away, reveal combined final render
@@ -1418,29 +1487,31 @@
                     layerA.classList.add('morph-layer-exit');
                     layerB.classList.add('morph-layer-exit');
 
-                    // Snap in the final combined render underneath (visible when layers finish exiting)
-                    this.renderer.render(step.regions, {
-                        color: finalColor,
-                        pattern: finalPattern,
-                        opacity,
-                        showLabels: this.showLabels
-                    });
-                }, 1800);
+                    // Snap to result: only regions in the final result, each in its source color/pattern.
+                    // Left regions rendered first; right overwrites any overlap.
+                    const leftResult  = step.leftRegions.filter(r => step.regions.includes(r));
+                    const rightResult = step.rightRegions.filter(r => step.regions.includes(r));
+                    this.renderer.renderMulti([
+                        { regions: leftResult,  color: leftColor,  pattern: leftPattern },
+                        { regions: rightResult, color: rightColor, pattern: rightPattern }
+                    ], { opacity, showLabels: this.showLabels });
+                }, 1800 * s);
                 this._morphTimeouts.push(t3);
 
                 // Phase 3 cleanup (2350ms): remove morph layers completely
                 const t4 = setTimeout(() => {
                     this.renderer.clearMorphLayer();
                     this._morphAnimating = false;
-                }, 2350);
+                }, 2350 * s);
                 this._morphTimeouts.push(t4);
             }
 
-            _pickColor(stepIndex) {
-                if (this.stepColors && this.stepColors[stepIndex] !== undefined) {
-                    return this.stepColors[stepIndex];
+            _shuffle(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
                 }
-                return this.colorPalette[((stepIndex % this.colorPalette.length) + this.colorPalette.length) % this.colorPalette.length];
+                return arr;
             }
 
             updateNavigation() {
@@ -1476,7 +1547,7 @@
                         if (!this.isPlaying) return;
                         // If a morph animation is running, wait for it to finish before advancing
                         const step = this.steps[this.currentStep];
-                        const delay = (step && step.isCombineStep) ? 2600 : 2000;
+                        const delay = ((step && step.isCombineStep) ? 2600 : 2000) / this.animSpeed;
                         this.playInterval = setTimeout(() => {
                             if (!this.isPlaying) return;
                             if (this.currentStep < this.steps.length - 1) {
@@ -1543,6 +1614,18 @@
                     this.opacity = e.target.value / 100;
                     this.opacityValue.textContent = `${e.target.value}%`;
                     this.updateRender();
+                });
+
+                this.speedSlider.addEventListener('input', (e) => {
+                    this.animSpeed = e.target.value / 100;
+                    const label = this.animSpeed === 1 ? '1×' : `${this.animSpeed.toFixed(2).replace(/\.?0+$/, '')}×`;
+                    this.speedValue.textContent = label;
+                    // Update CSS custom properties so running CSS animations scale too
+                    const root = document.documentElement;
+                    const s = 1 / this.animSpeed;
+                    root.style.setProperty('--morph-enter-dur', `${0.4 * s}s`);
+                    root.style.setProperty('--morph-pulse-dur', `${0.6 * s}s`);
+                    root.style.setProperty('--morph-exit-dur',  `${0.5 * s}s`);
                 });
 
                 this.showLabelsCheckbox.addEventListener('change', (e) => {
