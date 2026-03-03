@@ -196,6 +196,15 @@
             line-height: 1.4;
         }
 
+        #disjoint-result {
+            margin-top: 8px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #4455aa;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
         .nav-buttons {
             display: flex;
             gap: 8px;
@@ -330,23 +339,63 @@
             font-size: 11px;
         }
 
-        #region-labels-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        #labels-toggle-btn {
+            width: 100%;
+            padding: 8px 12px;
             margin-bottom: 15px;
-        }
-
-        #region-labels-toggle input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-
-        #region-labels-toggle label {
+            border: 1px solid #c0c0cc;
+            border-radius: 6px;
+            background: #e8e8ec;
+            color: #606075;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            text-align: left;
+        }
+
+        #labels-toggle-btn:hover {
+            background: #d5d5dc;
+            border-color: #a0a0b5;
+        }
+
+        #labels-toggle-btn.active {
+            background: #dde0f5;
+            border-color: #a0a8d0;
+            color: #4455aa;
+        }
+
+        .partition-mode {
+            display: flex;
+            margin-bottom: 15px;
+            border: 1px solid #c0c0cc;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .partition-mode-btn {
+            flex: 1;
+            padding: 8px 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            border: none;
+            background: #e8e8ec;
             color: #606075;
             cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .partition-mode-btn + .partition-mode-btn {
+            border-left: 1px solid #c0c0cc;
+        }
+
+        .partition-mode-btn:hover:not(.active) {
+            background: #d5d5dc;
+        }
+
+        .partition-mode-btn.active {
+            background: #dde0f5;
+            color: #4455aa;
         }
 
         #expression-display {
@@ -527,6 +576,7 @@
                 <div class="step-description" id="step-description">
                     Parsing the expression...
                 </div>
+                <div id="disjoint-result" style="display: none;"></div>
             </div>
 
             <div class="nav-buttons">
@@ -552,9 +602,10 @@
                 <input type="range" id="speed-slider" min="25" max="300" value="75" step="25">
             </div>
 
-            <div id="region-labels-toggle">
-                <input type="checkbox" id="show-labels" checked>
-                <label for="show-labels">Show region labels</label>
+            <button id="labels-toggle-btn" class="active">Region labels: on</button>
+            <div class="partition-mode">
+                <button class="partition-mode-btn active" id="joint-mode-btn">Joint</button>
+                <button class="partition-mode-btn" id="disjoint-mode-btn">Disjoint</button>
             </div>
 
             <div class="shortcuts">
@@ -566,7 +617,6 @@
                 <div class="shortcut"><span>Backspace</span><kbd>⌫</kbd></div>
             </div>
 
-            <button id="hide-panel-btn" style="margin-top: 15px; padding: 10px; background: #e8e8ec; border: 1px solid #c0c0cc; border-radius: 6px; cursor: pointer; width: 100%; color: #606075; font-family: 'JetBrains Mono', monospace; font-size: 13px;">Hide Panel</button>
         </div>
 
     <button id="toggle-panel-btn" class="hidden">☰</button>
@@ -1054,7 +1104,7 @@
             }
 
             render(shadedRegions, options = {}) {
-                const { color = '#7b88c9', pattern = 'solid', opacity = 0.50, showLabels = true } = options;
+                const { color = '#7b88c9', pattern = 'solid', opacity = 0.50, showLabels = true, disjointLabels = false } = options;
 
                 Object.values(this.regionElements).forEach(el => el.style.display = 'none');
 
@@ -1077,21 +1127,25 @@
 
                 const labelsGroup = this.svg.querySelector("#region-labels-group");
                 if (labelsGroup) {
-                    labelsGroup.style.display = showLabels ? 'inline' : 'none';
+                    const mode = disjointLabels ? 'disjoint' : 'joint';
+                    if (labelsGroup.dataset.mode !== mode) { labelsGroup.remove(); if (showLabels) this.drawLabels(disjointLabels); }
+                    else labelsGroup.style.display = showLabels ? 'inline' : 'none';
                 } else if (showLabels) {
-                    this.drawLabels();
+                    this.drawLabels(disjointLabels);
                 }
             }
 
-            drawLabels() {
+            drawLabels(disjointLabels = false) {
+                const mode = disjointLabels ? 'disjoint' : 'joint';
                 let g = this.svg.querySelector("#region-labels-group");
+                if (g && g.dataset.mode !== mode) { g.remove(); g = null; }
                 if (!g) {
                     g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                     g.id = "region-labels-group";
+                    g.dataset.mode = mode;
                     this.labelsLayer.appendChild(g);
 
                     const fontSize = Math.max(10, this.width * 0.018);
-                    
                     const a = this.circleCenters.A;
                     const b = this.circleCenters.B;
                     const c = this.circleCenters.C;
@@ -1107,16 +1161,24 @@
                         7: { x: (a.x + b.x + c.x) / 3, y: (a.y + b.y + c.y) / 3 }
                     };
 
-                    const labels = { 1: 'A', 2: 'B', 4: 'C', 3: 'AB', 5: 'AC', 6: 'BC', 7: 'ABC' };
+                    const P = '\u2032';
+                    const labelMap = disjointLabels
+                        ? { 0: `A${P}B${P}C${P}`, 1: `AB${P}C${P}`, 2: `A${P}BC${P}`, 3: `ABC${P}`, 4: `A${P}B${P}C`, 5: `AB${P}C`, 6: `A${P}BC`, 7: 'ABC' }
+                        : { 1: 'A', 2: 'B', 4: 'C', 3: 'AB', 5: 'AC', 6: 'BC', 7: 'ABC' };
+
+                    if (disjointLabels) {
+                        positions[0] = { x: this.sampleRect.x + this.sampleRect.width - 45, y: this.sampleRect.y + this.sampleRect.height - 15 };
+                    }
 
                     Object.entries(positions).forEach(([region, pos]) => {
+                        if (!labelMap[region]) return;
                         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                         text.setAttribute("x", pos.x);
                         text.setAttribute("y", pos.y);
                         text.setAttribute("text-anchor", "middle");
                         text.setAttribute("fill", "#4a4a68");
                         text.style.font = `${fontSize}px sans-serif`;
-                        text.textContent = labels[region];
+                        text.textContent = labelMap[region];
                         g.appendChild(text);
                     });
                 }
@@ -1128,7 +1190,7 @@
             // Render multiple region groups each with their own color/pattern in a single pass.
             // Later groups overwrite earlier ones for any shared regions.
             renderMulti(groups, options = {}) {
-                const { opacity = 0.50, showLabels = true } = options;
+                const { opacity = 0.50, showLabels = true, disjointLabels = false } = options;
 
                 Object.values(this.regionElements).forEach(el => el.style.display = 'none');
 
@@ -1151,9 +1213,11 @@
 
                 const labelsGroup = this.svg.querySelector("#region-labels-group");
                 if (labelsGroup) {
-                    labelsGroup.style.display = showLabels ? 'inline' : 'none';
+                    const mode = disjointLabels ? 'disjoint' : 'joint';
+                    if (labelsGroup.dataset.mode !== mode) { labelsGroup.remove(); if (showLabels) this.drawLabels(disjointLabels); }
+                    else labelsGroup.style.display = showLabels ? 'inline' : 'none';
                 } else if (showLabels) {
-                    this.drawLabels();
+                    this.drawLabels(disjointLabels);
                 }
             }
 
@@ -1253,10 +1317,12 @@
                 this.opacityValue = document.getElementById('opacity-value');
                 this.speedSlider = document.getElementById('speed-slider');
                 this.speedValue = document.getElementById('speed-value');
-                this.showLabelsCheckbox = document.getElementById('show-labels');
+                this.disjointResult = document.getElementById('disjoint-result');
+                this.labelsToggleBtn = document.getElementById('labels-toggle-btn');
+                this.jointModeBtn = document.getElementById('joint-mode-btn');
+                this.disjointModeBtn = document.getElementById('disjoint-mode-btn');
                 this.controlPanel = document.getElementById('control-panel');
                 this.togglePanelBtn = document.getElementById('toggle-panel-btn');
-                this.hidePanelBtn = document.getElementById('hide-panel-btn');
 
                 // Expression state — built by symbol buttons
                 this.expression = '';
@@ -1277,6 +1343,7 @@
                 this.opacity = 0.50;
                 this.animSpeed = 0.75;
                 this.showLabels = true;
+                this.disjointMode = false;
                 this.stepColors   = [];
                 this.stepPatterns = [];
                 this._morphTimeouts = [];
@@ -1323,7 +1390,17 @@
             }
 
             initialRender() {
-                this.renderer.render([], { opacity: this.opacity, showLabels: this.showLabels });
+                if (this.showLabels) {
+                    const regionSet = this.disjointMode ? [0, 1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5, 6, 7];
+                    const groups = regionSet.map((r, i) => ({
+                        regions: [r],
+                        color: this.colorPalette[i % this.colorPalette.length],
+                        pattern: 'solid'
+                    }));
+                    this.renderer.renderMulti(groups, { opacity: this.opacity, showLabels: true, disjointLabels: this.disjointMode });
+                } else {
+                    this.renderer.render([], { opacity: this.opacity, showLabels: false, disjointLabels: this.disjointMode });
+                }
             }
 
             visualize() {
@@ -1362,6 +1439,24 @@
                 }
             }
 
+            regionsToDisjointString(regions) {
+                const P = '\u2032';
+                const NAMES = { 0:`A${P}B${P}C${P}`, 1:`AB${P}C${P}`, 2:`A${P}BC${P}`, 3:`ABC${P}`, 4:`A${P}B${P}C`, 5:`AB${P}C`, 6:`A${P}BC`, 7:'ABC' };
+                if (!regions || regions.length === 0) return '\u2205';
+                return [...regions].sort((a,b) => a-b).map(r => NAMES[r]).join(' \u222a ');
+            }
+
+            updateDisjointResult() {
+                if (!this.disjointResult) return;
+                if (this.disjointMode && this.steps.length > 0 && this.currentStep < this.steps.length) {
+                    const regions = this.steps[this.currentStep].regions;
+                    this.disjointResult.textContent = '= ' + this.regionsToDisjointString(regions);
+                    this.disjointResult.style.display = 'block';
+                } else {
+                    this.disjointResult.style.display = 'none';
+                }
+            }
+
             updateStepDisplay(animate = false) {
                 if (this.currentStep >= this.steps.length) {
                     this.currentStep = this.steps.length - 1;
@@ -1378,6 +1473,7 @@
                 this.stepNumber.textContent = `Step ${this.currentStep + 1} of ${this.steps.length}`;
                 this.stepType.textContent = step.type;
                 this.stepDescription.textContent = step.description;
+                this.updateDisjointResult();
 
                 // Run morph animation for combine steps when navigating forward
                 if (animate && step.isCombineStep && step.leftRegions && step.rightRegions) {
@@ -1394,17 +1490,18 @@
                         this.renderer.renderMulti([
                             { regions: leftResult,  color: leftColor,  pattern: leftPattern },
                             { regions: rightResult, color: rightColor, pattern: rightPattern }
-                        ], { opacity: this.opacity, showLabels: this.showLabels });
+                        ], { opacity: this.opacity, showLabels: this.showLabels, disjointLabels: this.disjointMode });
                     } else {
                         this.renderer.render(step.regions, {
                             color: stepColor, pattern: stepPattern,
-                            opacity: this.opacity, showLabels: this.showLabels
+                            opacity: this.opacity, showLabels: this.showLabels, disjointLabels: this.disjointMode
                         });
                     }
                 }
             }
 
             updateRender() {
+                if (this.steps.length === 0) { this.initialRender(); return; }
                 if (this.steps.length > 0 && this.currentStep < this.steps.length) {
                     const step = this.steps[this.currentStep];
                     if (step.isCombineStep) {
@@ -1417,13 +1514,13 @@
                         this.renderer.renderMulti([
                             { regions: leftResult,  color: leftColor,  pattern: leftPattern },
                             { regions: rightResult, color: rightColor, pattern: rightPattern }
-                        ], { opacity: this.opacity, showLabels: this.showLabels });
+                        ], { opacity: this.opacity, showLabels: this.showLabels, disjointLabels: this.disjointMode });
                     } else {
                         const stepColor   = this.stepColors[this.currentStep]   || this.colorPalette[0];
                         const stepPattern = this.stepPatterns[this.currentStep] || 'solid';
                         this.renderer.render(step.regions, {
                             color: stepColor, pattern: stepPattern,
-                            opacity: this.opacity, showLabels: this.showLabels
+                            opacity: this.opacity, showLabels: this.showLabels, disjointLabels: this.disjointMode
                         });
                     }
                 }
@@ -1608,7 +1705,6 @@
                 this.playBtn.addEventListener('click', () => this.togglePlay());
                 this.resetBtn.addEventListener('click', () => this.reset());
                 this.togglePanelBtn.addEventListener('click', () => this.showPanel());
-                this.hidePanelBtn.addEventListener('click', () => this.hidePanel());
 
                 this.opacitySlider.addEventListener('input', (e) => {
                     this.opacity = e.target.value / 100;
@@ -1628,9 +1724,31 @@
                     root.style.setProperty('--morph-exit-dur',  `${0.5 * s}s`);
                 });
 
-                this.showLabelsCheckbox.addEventListener('change', (e) => {
-                    this.showLabels = e.target.checked;
+                this.labelsToggleBtn.addEventListener('click', () => {
+                    this.showLabels = !this.showLabels;
+                    this.labelsToggleBtn.textContent = `Region labels: ${this.showLabels ? 'on' : 'off'}`;
+                    this.labelsToggleBtn.classList.toggle('active', this.showLabels);
                     this.updateRender();
+                });
+
+                this.jointModeBtn.addEventListener('click', () => {
+                    if (this.disjointMode) {
+                        this.disjointMode = false;
+                        this.jointModeBtn.classList.add('active');
+                        this.disjointModeBtn.classList.remove('active');
+                        this.updateRender();
+                        this.updateDisjointResult();
+                    }
+                });
+
+                this.disjointModeBtn.addEventListener('click', () => {
+                    if (!this.disjointMode) {
+                        this.disjointMode = true;
+                        this.disjointModeBtn.classList.add('active');
+                        this.jointModeBtn.classList.remove('active');
+                        this.updateRender();
+                        this.updateDisjointResult();
+                    }
                 });
 
                 document.addEventListener('keydown', (e) => {
