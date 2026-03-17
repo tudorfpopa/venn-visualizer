@@ -924,6 +924,7 @@
                 this.svg.setAttribute("viewBox", `0 0 ${this.width} ${this.height}`);
                 this.svg.style.width = "100%";
                 this.svg.style.height = "100%";
+                this.container.innerHTML = '';
                 this.container.appendChild(this.svg);
 
                 this.calculateDimensions();
