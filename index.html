@@ -313,9 +313,39 @@
             border-top: 1px solid #c0c0cc;
             padding-top: 15px;
             margin-top: 15px;
+            position: relative;
+            cursor: default;
         }
 
         .shortcuts-title {
+            font-size: 11px;
+            color: #808090;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .shortcuts-popup {
+            position: fixed;
+            right: 300px;
+            bottom: 20px;
+            background: #e8e8ec;
+            border: 1px solid #c0c0cc;
+            border-radius: 8px;
+            padding: 12px 14px;
+            box-shadow: -4px 4px 16px rgba(0,0,0,0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+            z-index: 200;
+            min-width: 200px;
+        }
+
+        .shortcuts:hover .shortcuts-popup {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .shortcuts-popup-title {
             font-size: 11px;
             color: #808090;
             margin-bottom: 8px;
@@ -608,14 +638,19 @@
                 <button class="partition-mode-btn" id="disjoint-mode-btn">Disjoint</button>
             </div>
 
+            <!-- keyboard shortcuts temporarily commented out
             <div class="shortcuts">
-                <div class="shortcuts-title">Keyboard Shortcuts</div>
-                <div class="shortcut"><span>Previous step</span><kbd>←</kbd></div>
-                <div class="shortcut"><span>Next step</span><kbd>→</kbd></div>
-                <div class="shortcut"><span>Play/Pause</span><kbd>Space</kbd></div>
-                <div class="shortcut"><span>Reset</span><kbd>R</kbd></div>
-                <div class="shortcut"><span>Backspace</span><kbd>⌫</kbd></div>
+                <div class="shortcuts-title">⌨ Keyboard Shortcuts</div>
+                <div class="shortcuts-popup">
+                    <div class="shortcuts-popup-title">Keyboard Shortcuts</div>
+                    <div class="shortcut"><span>Previous step</span><kbd>←</kbd></div>
+                    <div class="shortcut"><span>Next step</span><kbd>→</kbd></div>
+                    <div class="shortcut"><span>Play/Pause</span><kbd>Space</kbd></div>
+                    <div class="shortcut"><span>Reset</span><kbd>R</kbd></div>
+                    <div class="shortcut"><span>Backspace</span><kbd>⌫</kbd></div>
+                </div>
             </div>
+            -->
 
         </div>
 
