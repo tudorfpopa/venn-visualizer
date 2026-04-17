@@ -583,6 +583,131 @@
             background: #daeeda;
             border-color: #88cc88;
         }
+
+        #help-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid #a0a0b5;
+            background: #e8e8ec;
+            color: #606075;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        #help-btn:hover {
+            background: #d5d5dc;
+            border-color: #4455bb;
+            color: #4455bb;
+        }
+
+        #help-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        #help-modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #help-modal {
+            background: #dededf;
+            border-radius: 10px;
+            max-width: 380px;
+            width: calc(100% - 40px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        #help-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px 16px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #c8c8cc;
+        }
+
+        #help-modal-body {
+            overflow-y: auto;
+            padding: 16px 24px 24px;
+        }
+
+        #help-modal h3 {
+            font-size: 15px;
+            color: #303040;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        #help-modal h4 {
+            font-size: 12px;
+            color: #4455aa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 14px 0 6px;
+            font-weight: 600;
+        }
+
+        #help-modal p, #help-modal li {
+            font-size: 12px;
+            color: #505060;
+            line-height: 1.6;
+        }
+
+        #help-modal ul {
+            padding-left: 16px;
+            margin: 0;
+        }
+
+        #help-modal li {
+            margin-bottom: 4px;
+        }
+
+        #help-modal code {
+            background: #e0e0e8;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 12px;
+            color: #303048;
+        }
+
+        #help-modal-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #808090;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        #help-modal-close:hover {
+            color: #303040;
+            background: #d0d0d8;
+        }
     </style>
 </head>
 <body>
@@ -590,8 +715,52 @@
         <div id="venn-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;"></div>
     </div>
 
+    <div id="help-modal-overlay">
+        <div id="help-modal">
+            <div id="help-modal-header">
+                <h3>How to use the Visualizer</h3>
+                <button id="help-modal-close" title="Close">×</button>
+            </div>
+            <div id="help-modal-body">
+                <h4>Building an expression</h4>
+                <p>Use the buttons to compose a set expression with up to three sets:</p>
+                <ul>
+                    <li><code>A</code>, <code>B</code>, <code>C</code> — the three sets</li>
+                    <li><code>∪</code> — union (elements in either set)</li>
+                    <li><code>∩</code> — intersection (elements in both sets)</li>
+                    <li><code>′</code> — complement (postfix; elements <em>not</em> in the set)</li>
+                    <li><code>( )</code> — parentheses to control precedence</li>
+                </ul>
+                <p>Press <code>↵</code> or the Enter key to visualize the expression.</p>
+
+                <h4>Stepping through</h4>
+                <p>The expression is evaluated step by step. Use <code>Prev</code> / <code>Next</code> to move between steps, or <code>Play</code> to animate automatically. <code>Reset</code> clears everything.</p>
+
+                <h4>Display options</h4>
+                <ul>
+                    <li><strong>Opacity</strong> — controls how dark the shaded regions appear.</li>
+                    <li><strong>Anim Speed</strong> — scales the merge animation duration.</li>
+                    <li><strong>Region labels</strong> — toggle the region name labels on/off.</li>
+                    <li><strong>Joint / Disjoint</strong> — Joint shows overlapping region names (e.g. <code>AB</code>); Disjoint shows the minimal partition notation (e.g. <code>ABC′</code>) and lists the partition in the step panel.</li>
+                </ul>
+
+                <h4>Keyboard shortcuts</h4>
+                <ul>
+                    <li><code>Enter</code> — compute</li>
+                    <li><code>←</code> / <code>→</code> — previous / next step</li>
+                    <li><code>Space</code> — play / pause</li>
+                    <li><code>R</code> — reset</li>
+                    <li><code>⌫</code> — backspace</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div id="control-panel">
-            <h2>Venn Diagram Visualizer</h2>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
+                <h2 style="margin-bottom:0;">Venn Diagram Visualizer</h2>
+                <button id="help-btn" title="Help">?</button>
+            </div>
 
             <div class="input-group">
                 <label>Expression</label>
@@ -1810,6 +1979,15 @@
                 });
 
                 document.getElementById('enter-btn').addEventListener('click', () => this.visualize());
+
+                const helpBtn = document.getElementById('help-btn');
+                const helpOverlay = document.getElementById('help-modal-overlay');
+                const helpClose = document.getElementById('help-modal-close');
+                helpBtn.addEventListener('click', () => helpOverlay.classList.add('visible'));
+                helpClose.addEventListener('click', () => helpOverlay.classList.remove('visible'));
+                helpOverlay.addEventListener('click', (e) => {
+                    if (e.target === helpOverlay) helpOverlay.classList.remove('visible');
+                });
 
                 document.addEventListener('keydown', (e) => {
                     // Backspace key
